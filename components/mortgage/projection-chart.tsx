@@ -137,7 +137,7 @@ export function ProjectionChart({
             <div className="relative">
               {/* Retirement labels positioned above chart */}
               {retirementLabels.length > 0 && (
-                <div className="relative h-10 ml-[50px] mr-[5px]">
+                <div className="relative h-10" style={{ marginLeft: 60, marginRight: 20 }}>
                   {retirementLabels.map((label, index) => (
                     <div 
                       key={index} 
@@ -152,7 +152,7 @@ export function ProjectionChart({
               )}
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={combinedData} onClick={handleChartClick}>
+                <AreaChart data={combinedData} onClick={handleChartClick} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <defs>
                     {mortgageTypes.map((type) => (
                       <linearGradient
@@ -232,7 +232,7 @@ export function ProjectionChart({
             <div className="relative">
               {/* Retirement labels positioned above chart */}
               {retirementLabels.length > 0 && (
-                <div className="relative h-10 ml-[50px] mr-[5px]">
+                <div className="relative h-10" style={{ marginLeft: 60, marginRight: 20 }}>
                   {retirementLabels.map((label, index) => (
                     <div 
                       key={index} 
@@ -247,7 +247,7 @@ export function ProjectionChart({
               )}
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={combinedData} onClick={handleChartClick}>
+                <LineChart data={combinedData} onClick={handleChartClick} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
                     dataKey="year"
@@ -305,7 +305,7 @@ export function ProjectionChart({
             <div className="relative">
               {/* Retirement labels positioned above chart */}
               {retirementLabels.length > 0 && (
-                <div className="relative h-10 ml-[50px] mr-[5px]">
+                <div className="relative h-10" style={{ marginLeft: 60, marginRight: 20 }}>
                   {retirementLabels.map((label, index) => (
                     <div 
                       key={index} 
@@ -320,7 +320,7 @@ export function ProjectionChart({
               )}
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={combinedData} onClick={handleChartClick}>
+                <AreaChart data={combinedData} onClick={handleChartClick} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <defs>
                     <linearGradient id="propertyGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={CHART_COLORS.property} stopOpacity={0.4} />

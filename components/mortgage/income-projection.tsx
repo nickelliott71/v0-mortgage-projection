@@ -154,7 +154,7 @@ export function IncomeProjection({
         <div className="relative">
           {/* Retirement labels positioned above chart */}
           {retirementLabels.length > 0 && (
-            <div className="relative h-10 ml-[50px] mr-[5px]">
+            <div className="relative h-10" style={{ marginLeft: 60, marginRight: 20 }}>
               {retirementLabels.map((label, index) => (
                 <div 
                   key={index} 
@@ -169,7 +169,7 @@ export function IncomeProjection({
           )}
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={combinedData}>
+            <ComposedChart data={combinedData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
               <defs>
                 <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#059669" stopOpacity={0.25} />
