@@ -180,6 +180,7 @@ export default function MortgageProjectionPage() {
               projections={projections}
               selectedYear={selectedYear}
               onYearChange={setSelectedYear}
+              applicants={applicants}
             />
           </div>
 

@@ -4,10 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   type MortgageType,
+  type ApplicantData,
   MORTGAGE_CONFIGS,
   CHART_COLORS,
   type ProjectionData,
   formatCurrency,
+  calculateAge,
 } from "@/lib/mortgage-calculations"
 import {
   LineChart,
@@ -27,6 +29,7 @@ interface ProjectionChartProps {
   projections: Record<MortgageType, ProjectionData[]>
   selectedYear: number
   onYearChange: (year: number) => void
+  applicants?: ApplicantData[]
 }
 
 type ChartView = "equity" | "balance" | "property"
@@ -35,8 +38,31 @@ export function ProjectionChart({
   projections,
   selectedYear,
   onYearChange,
+  applicants = [],
 }: ProjectionChartProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
+
+  // Calculate retirement years for each applicant
+  const retirementMarkers = applicants.map((applicant, index) => {
+    const applicantAge = calculateAge(applicant.dateOfBirth)
+    const yearsToRetirement = applicant.plannedRetirementAge - applicantAge
+    return {
+      year: yearsToRetirement,
+      label: `Applicant ${index + 1} Retires`,
+      age: applicant.plannedRetirementAge,
+    }
+  }).filter(marker => marker.year > 0 && marker.year <= 40)
+
+  // Deduplicate markers at same year
+  const uniqueRetirementMarkers = retirementMarkers.reduce((acc, marker) => {
+    const existing = acc.find(m => m.year === marker.year)
+    if (existing) {
+      existing.label = "Both Retire"
+    } else {
+      acc.push(marker)
+    }
+    return acc
+  }, [] as typeof retirementMarkers)
 
   // Combine data for multi-line chart
   const combinedData = projections.retirement.map((_, index) => {
@@ -145,6 +171,23 @@ export function ProjectionChart({
                     wrapperStyle={{ paddingTop: "20px" }}
                     formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
                   />
+                  {/* Retirement reference lines for each applicant */}
+                  {uniqueRetirementMarkers.map((marker, index) => (
+                    <ReferenceLine
+                      key={`retirement-${index}`}
+                      x={marker.year}
+                      stroke="#dc2626"
+                      strokeDasharray="5 5"
+                      strokeWidth={2}
+                      label={{
+                        value: marker.label,
+                        position: "insideTopRight",
+                        fill: "#dc2626",
+                        fontSize: 10,
+                        fontWeight: 500,
+                      }}
+                    />
+                  ))}
                   <ReferenceLine
                     x={selectedYear}
                     stroke="#1e40af"
@@ -197,6 +240,23 @@ export function ProjectionChart({
                     wrapperStyle={{ paddingTop: "20px" }}
                     formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
                   />
+                  {/* Retirement reference lines for each applicant */}
+                  {uniqueRetirementMarkers.map((marker, index) => (
+                    <ReferenceLine
+                      key={`retirement-${index}`}
+                      x={marker.year}
+                      stroke="#dc2626"
+                      strokeDasharray="5 5"
+                      strokeWidth={2}
+                      label={{
+                        value: marker.label,
+                        position: "insideTopRight",
+                        fill: "#dc2626",
+                        fontSize: 10,
+                        fontWeight: 500,
+                      }}
+                    />
+                  ))}
                   <ReferenceLine
                     x={selectedYear}
                     stroke="#1e40af"
@@ -256,6 +316,23 @@ export function ProjectionChart({
                     wrapperStyle={{ paddingTop: "20px" }}
                     formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
                   />
+                  {/* Retirement reference lines for each applicant */}
+                  {uniqueRetirementMarkers.map((marker, index) => (
+                    <ReferenceLine
+                      key={`retirement-${index}`}
+                      x={marker.year}
+                      stroke="#dc2626"
+                      strokeDasharray="5 5"
+                      strokeWidth={2}
+                      label={{
+                        value: marker.label,
+                        position: "insideTopRight",
+                        fill: "#dc2626",
+                        fontSize: 10,
+                        fontWeight: 500,
+                      }}
+                    />
+                  ))}
                   <ReferenceLine
                     x={selectedYear}
                     stroke="#1e40af"
