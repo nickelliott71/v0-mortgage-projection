@@ -30,7 +30,7 @@ export function ApplicantSummary({
 
   return (
     <Card>
-      <CardHeader className="pb-2">
+      <CardHeader>
         <CardTitle className="text-lg">Application Summary</CardTitle>
       </CardHeader>
       <CardContent>
@@ -39,7 +39,7 @@ export function ApplicantSummary({
           {applicants.map((applicant, index) => {
             const currentAge = calculateAge(applicant.dateOfBirth)
             const yearsToRetirement = applicant.plannedRetirementAge - currentAge
-            
+
             return (
               <div key={index} className="space-y-4">
                 <div className="flex items-center gap-2">
@@ -79,7 +79,7 @@ export function ApplicantSummary({
                       </div>
                       <Slider
                         value={[applicant.plannedRetirementAge]}
-                        onValueChange={([value]) => 
+                        onValueChange={([value]) =>
                           onApplicantChange(index, { plannedRetirementAge: value })
                         }
                         min={Math.max(50, currentAge)}
@@ -88,7 +88,7 @@ export function ApplicantSummary({
                         className="w-full"
                       />
                       <p className="text-xs text-muted-foreground text-center">
-                        {yearsToRetirement > 0 
+                        {yearsToRetirement > 0
                           ? `${yearsToRetirement} years until retirement`
                           : "Already retired"
                         }
@@ -173,7 +173,7 @@ export function ApplicantSummary({
                   </div>
                   <Slider
                     value={[property.loanAmount]}
-                    onValueChange={([value]) => 
+                    onValueChange={([value]) =>
                       onPropertyChange({ loanAmount: value })
                     }
                     min={25000}
