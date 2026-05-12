@@ -20,7 +20,7 @@ export function YearSelector({
 }: YearSelectorProps) {
   return (
     <Card className="bg-primary text-primary-foreground">
-      <CardContent className="pt-6">
+      <CardContent>
         <div className="flex flex-col md:flex-row md:items-center gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
