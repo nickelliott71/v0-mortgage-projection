@@ -32,7 +32,7 @@ export function SummaryCards({ projections, selectedYear }: SummaryCardsProps) {
               className="absolute top-0 left-0 w-1 h-full"
               style={{ backgroundColor: config.color }}
             />
-            <CardContent className="pt-4">
+            <CardContent className="pt-3 pb-3">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
