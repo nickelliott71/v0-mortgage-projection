@@ -25,7 +25,7 @@ export function YearSelector({
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="h-5 w-5" />
-              <h3 className="text-lg font-semibold">Projection Timeline</h3>
+              <h3 className="text-lg font-semibold">Projection timeline</h3>
             </div>
             <p className="text-primary-foreground/80 text-sm">
               Drag the slider or click on the chart to view projections at different points in time

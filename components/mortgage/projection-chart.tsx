@@ -128,7 +128,7 @@ export function ProjectionChart({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>40-Year Projection Comparison</CardTitle>
+        <CardTitle>40-year projection comparison</CardTitle>
         <CardDescription>
           Compare equity, loan balance, and property value across all mortgage types
         </CardDescription>
@@ -137,8 +137,8 @@ export function ProjectionChart({
         <Tabs defaultValue="equity" className="space-y-4">
           <TabsList className="grid w-full max-w-md grid-cols-3">
             <TabsTrigger value="equity">Equity</TabsTrigger>
-            <TabsTrigger value="balance">Loan Balance</TabsTrigger>
-            <TabsTrigger value="property">Property Value</TabsTrigger>
+            <TabsTrigger value="balance">Loan balance</TabsTrigger>
+            <TabsTrigger value="property">Property value</TabsTrigger>
           </TabsList>
 
           <TabsContent value="equity" className="space-y-4">
@@ -391,7 +391,7 @@ export function ProjectionChart({
                   <Area
                     type="monotone"
                     dataKey="propertyValue"
-                    name="Property Value"
+                    name="Property value"
                     stroke={CHART_COLORS.property}
                     fill="url(#propertyGradient)"
                     strokeWidth={3}

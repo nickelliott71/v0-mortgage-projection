@@ -34,12 +34,12 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
 
   const features: Feature[] = [
     {
-      label: "Minimum Age",
+      label: "Minimum age",
       key: "minAge",
       getValue: (type) => (type === "homeReversion" ? "70+" : "50+"),
     },
     {
-      label: "Home Ownership",
+      label: "Home ownership",
       key: "ownership",
       getValue: (type) =>
         type === "homeReversion" ? (
@@ -53,7 +53,7 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
         ),
     },
     {
-      label: "Monthly Payments",
+      label: "Monthly payments",
       key: "payments",
       getValue: (type, data) => {
         const config = MORTGAGE_CONFIGS[type]
@@ -75,19 +75,19 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
       },
     },
     {
-      label: "Loan Balance at Year " + selectedYear,
+      label: "Loan balance at year " + selectedYear,
       key: "balance",
       getValue: (_, data) => formatCurrency(data.loanBalance),
     },
     {
-      label: "Equity at Year " + selectedYear,
+      label: "Equity at year " + selectedYear,
       key: "equity",
       getValue: (_, data) => (
         <span className="font-semibold text-foreground">{formatCurrency(data.equity)}</span>
       ),
     },
     {
-      label: "Proof of Income",
+      label: "Proof of income",
       key: "proof",
       getValue: (type) =>
         type === "lifetime" || type === "homeReversion" ? (
@@ -101,7 +101,7 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
         ),
     },
     {
-      label: "Loan Balance Trend",
+      label: "Loan balance trend",
       key: "trend",
       getValue: (type) => {
         const config = MORTGAGE_CONFIGS[type]
@@ -125,13 +125,13 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
       },
     },
     {
-      label: "Length of Plan",
+      label: "Length of plan",
       key: "length",
       getValue: (type) =>
         type === "retirement" ? "Fixed term" : "For life",
     },
     {
-      label: "Repayment Trigger",
+      label: "Repayment trigger",
       key: "trigger",
       getValue: (type) =>
         type === "retirement"
@@ -143,9 +143,9 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Detailed Comparison</CardTitle>
+        <CardTitle>Detailed comparison</CardTitle>
         <CardDescription>
-          Side-by-side feature comparison for all mortgage types at Year {selectedYear}
+          Side-by-side feature comparison for all mortgage types at year {selectedYear}
         </CardDescription>
       </CardHeader>
       <CardContent>

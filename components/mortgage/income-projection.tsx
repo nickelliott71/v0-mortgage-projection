@@ -121,13 +121,13 @@ export function IncomeProjection({
           {incomeItem && (
             <div className="flex items-center gap-2 text-sm mb-2 pb-2 border-b border-border">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#059669" }} />
-              <span className="text-muted-foreground">Household Income:</span>
+              <span className="text-muted-foreground">Household income:</span>
               <span className="font-semibold text-foreground">
                 {formatCurrency(incomeItem.value)}/yr
               </span>
             </div>
           )}
-          <p className="text-xs text-muted-foreground mb-1">Annual Mortgage Payments:</p>
+          <p className="text-xs text-muted-foreground mb-1">Annual mortgage payments:</p>
           {payload
             .filter((p) => p.dataKey.includes("Payment"))
             .map((entry, index) => {
@@ -163,7 +163,7 @@ export function IncomeProjection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Household Income vs. Annual Mortgage Payments</CardTitle>
+        <CardTitle>Household income vs. annual mortgage payments</CardTitle>
         <CardDescription>
           Combined household income from all applicants, with annual mortgage payments for each type. 
           Income transitions to pension income at each applicant&apos;s retirement age.
@@ -244,7 +244,7 @@ export function IncomeProjection({
               <Area
                 type="monotone"
                 dataKey="income"
-                name="Household Income"
+                name="Household income"
                 stroke="#059669"
                 fill="url(#incomeGradient)"
                 strokeWidth={3}
@@ -289,7 +289,7 @@ export function IncomeProjection({
                 </p>
                 <p className="text-xs text-muted-foreground">of income</p>
                 <div className="mt-2 pt-2 border-t border-border/50">
-                  <p className="text-xs text-muted-foreground">Net Income</p>
+                  <p className="text-xs text-muted-foreground">Net income</p>
                   <p className="text-sm font-semibold text-foreground">
                     {formatCurrency(netIncome)}/yr
                   </p>

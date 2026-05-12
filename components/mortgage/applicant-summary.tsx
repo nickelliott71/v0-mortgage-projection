@@ -31,7 +31,7 @@ export function ApplicantSummary({
   return (
     <Card className="gap-2 py-4">
       <CardHeader>
-        <CardTitle className="text-lg">Application Summary</CardTitle>
+        <CardTitle className="text-lg">Application summary</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -71,7 +71,7 @@ export function ApplicantSummary({
                       <div className="flex items-center justify-between">
                         <Label className="text-xs text-muted-foreground flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          Retirement Age
+                          Retirement age
                         </Label>
                         <span className="text-sm font-semibold text-primary">
                           {applicant.plannedRetirementAge}
@@ -109,7 +109,7 @@ export function ApplicantSummary({
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground flex items-center gap-1">
                       <PoundSterling className="h-3 w-3" />
-                      Current Income
+                      Current income
                     </span>
                     <span className="font-medium text-foreground">
                       {formatCurrency(applicant.annualIncome)}/yr
@@ -117,19 +117,19 @@ export function ApplicantSummary({
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">State Pension</span>
+                    <span className="text-muted-foreground">State pension</span>
                     <span className="text-foreground">{formatCurrency(applicant.statePension)}/yr</span>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Other Pension</span>
+                    <span className="text-muted-foreground">Other pension</span>
                     <span className="text-foreground">{formatCurrency(applicant.otherPension)}/yr</span>
                   </div>
 
                   {/* Retirement Income Summary */}
                   <div className="pt-2 mt-2 border-t border-border">
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground text-xs">Retirement Income</span>
+                      <span className="text-muted-foreground text-xs">Retirement income</span>
                       <span className="font-semibold text-foreground">
                         {formatCurrency(applicant.statePension + applicant.otherPension)}/yr
                       </span>
@@ -147,14 +147,14 @@ export function ApplicantSummary({
                 <Home className="h-4 w-4 text-accent" />
               </div>
               <div>
-                <p className="font-medium text-foreground">Property & Loan</p>
+                <p className="font-medium text-foreground">Property & loan</p>
                 <p className="text-xs text-muted-foreground">Adjust loan amount</p>
               </div>
             </div>
 
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Property Value</span>
+                <span className="text-muted-foreground">Property value</span>
                 <span className="font-semibold text-foreground text-base">
                   {formatCurrency(property.propertyValue)}
                 </span>
@@ -165,7 +165,7 @@ export function ApplicantSummary({
                 <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
                   <div className="flex items-center justify-between">
                     <Label className="text-xs text-muted-foreground">
-                      Loan Amount
+                      Loan amount
                     </Label>
                     <span className="text-sm font-semibold text-primary">
                       {formatCurrency(property.loanAmount)}
@@ -188,7 +188,7 @@ export function ApplicantSummary({
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Loan Amount</span>
+                  <span className="text-muted-foreground">Loan amount</span>
                   <span className="font-semibold text-foreground text-base">
                     {formatCurrency(property.loanAmount)}
                   </span>
@@ -196,14 +196,14 @@ export function ApplicantSummary({
               )}
 
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Current Equity</span>
+                <span className="text-muted-foreground">Current equity</span>
                 <span className="font-semibold text-accent text-base">
                   {formatCurrency(property.propertyValue - property.loanAmount)}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">LTV Ratio</span>
+                <span className="text-muted-foreground">LTV ratio</span>
                 <Badge variant="outline">
                   {((property.loanAmount / property.propertyValue) * 100).toFixed(1)}%
                 </Badge>
