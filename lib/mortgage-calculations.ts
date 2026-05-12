@@ -49,6 +49,34 @@ export const CHART_COLORS = {
   property: "#059669", // Emerald green
 } as const
 
+// Accessibility patterns for colorblind users - each mortgage type has unique visual characteristics
+export const ACCESSIBILITY_PATTERNS: Record<MortgageType, {
+  strokeDasharray: string;
+  markerShape: 'circle' | 'square' | 'triangle' | 'diamond';
+  markerInterval: number; // Show marker every N data points
+}> = {
+  retirement: {
+    strokeDasharray: "0", // Solid line
+    markerShape: 'circle',
+    markerInterval: 5,
+  },
+  rio: {
+    strokeDasharray: "8 4", // Dashed line
+    markerShape: 'square',
+    markerInterval: 5,
+  },
+  lifetime: {
+    strokeDasharray: "2 2", // Dotted line
+    markerShape: 'triangle',
+    markerInterval: 5,
+  },
+  homeReversion: {
+    strokeDasharray: "8 2 2 2", // Dash-dot line
+    markerShape: 'diamond',
+    markerInterval: 5,
+  },
+}
+
 export const MORTGAGE_CONFIGS: Record<MortgageType, MortgageConfig> = {
   retirement: {
     name: "Retirement Mortgage",

@@ -6,6 +6,7 @@ import {
   type ApplicantData,
   MORTGAGE_CONFIGS,
   CHART_COLORS,
+  ACCESSIBILITY_PATTERNS,
   type ProjectionData,
   formatCurrency,
   calculateAge,
@@ -42,6 +43,40 @@ export function IncomeProjection({
   applicants = [],
 }: IncomeProjectionProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
+
+  // Helper to render shape indicator for accessibility
+  const renderShapeIndicator = (type: MortgageType, color: string, size: number = 12) => {
+    const pattern = ACCESSIBILITY_PATTERNS[type]
+    
+    switch (pattern.markerShape) {
+      case 'circle':
+        return (
+          <svg width={size} height={size} className="flex-shrink-0">
+            <circle cx={size/2} cy={size/2} r={size/2 - 1} fill={color} />
+          </svg>
+        )
+      case 'square':
+        return (
+          <svg width={size} height={size} className="flex-shrink-0">
+            <rect x={1} y={1} width={size - 2} height={size - 2} fill={color} />
+          </svg>
+        )
+      case 'triangle':
+        return (
+          <svg width={size} height={size} className="flex-shrink-0">
+            <polygon points={`${size/2},1 ${size - 1},${size - 1} 1,${size - 1}`} fill={color} />
+          </svg>
+        )
+      case 'diamond':
+        return (
+          <svg width={size} height={size} className="flex-shrink-0">
+            <polygon points={`${size/2},0 ${size},${size/2} ${size/2},${size} 0,${size/2}`} fill={color} />
+          </svg>
+        )
+      default:
+        return <div className="rounded-full flex-shrink-0" style={{ backgroundColor: color, width: size, height: size }} />
+    }
+  }
 
   // Get scaled x-axis ticks
   const scaledTicks = getScaledXAxisTicks()
@@ -131,16 +166,13 @@ export function IncomeProjection({
           {payload
             .filter((p) => p.dataKey.includes("Payment"))
             .map((entry, index) => {
-              const typeName = entry.dataKey.replace("Payment", "")
-              const config = MORTGAGE_CONFIGS[typeName as MortgageType]
+              const typeName = entry.dataKey.replace("Payment", "") as MortgageType
+              const config = MORTGAGE_CONFIGS[typeName]
               const netIncome = yearData ? yearData[`${typeName}NetIncome`] : 0
               return (
                 <div key={index} className="flex items-center justify-between gap-4 text-sm py-0.5">
                   <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-sm"
-                      style={{ backgroundColor: config.color }}
-                    />
+                    {renderShapeIndicator(typeName, config.color, 12)}
                     <span className="text-muted-foreground">{config.shortName}:</span>
                   </div>
                   <div className="text-right">
@@ -148,7 +180,7 @@ export function IncomeProjection({
                       {formatCurrency(entry.value)}
                     </span>
                     <span className="text-xs text-muted-foreground ml-1">
-                      (Net: {formatCurrency(netIncome)})
+                      (Net: {formatCurrency(netIncome as number)})
                     </span>
                   </div>
                 </div>
@@ -277,10 +309,9 @@ export function IncomeProjection({
 
             return (
               <div key={type} className="text-center p-3 rounded-lg bg-muted/30">
-                <div
-                  className="w-4 h-4 rounded-sm mx-auto mb-2"
-                  style={{ backgroundColor: MORTGAGE_CONFIGS[type].color }}
-                />
+                <div className="flex justify-center mb-2">
+                  {renderShapeIndicator(type, MORTGAGE_CONFIGS[type].color, 16)}
+                </div>
                 <p className="text-xs font-medium text-foreground">
                   {MORTGAGE_CONFIGS[type].shortName}
                 </p>

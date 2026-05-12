@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   type MortgageType,
   MORTGAGE_CONFIGS,
+  ACCESSIBILITY_PATTERNS,
   type ProjectionData,
   formatCurrency,
 } from "@/lib/mortgage-calculations"
@@ -31,6 +32,41 @@ interface Feature {
 
 export function ComparisonTable({ projections, selectedYear }: ComparisonTableProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
+
+  // Helper to render shape indicator for accessibility
+  const renderShapeIndicator = (type: MortgageType, size: number = 12) => {
+    const pattern = ACCESSIBILITY_PATTERNS[type]
+    const color = MORTGAGE_CONFIGS[type].color
+    
+    switch (pattern.markerShape) {
+      case 'circle':
+        return (
+          <svg width={size} height={size} className="flex-shrink-0">
+            <circle cx={size/2} cy={size/2} r={size/2 - 1} fill={color} />
+          </svg>
+        )
+      case 'square':
+        return (
+          <svg width={size} height={size} className="flex-shrink-0">
+            <rect x={1} y={1} width={size - 2} height={size - 2} fill={color} />
+          </svg>
+        )
+      case 'triangle':
+        return (
+          <svg width={size} height={size} className="flex-shrink-0">
+            <polygon points={`${size/2},1 ${size - 1},${size - 1} 1,${size - 1}`} fill={color} />
+          </svg>
+        )
+      case 'diamond':
+        return (
+          <svg width={size} height={size} className="flex-shrink-0">
+            <polygon points={`${size/2},0 ${size},${size/2} ${size/2},${size} 0,${size/2}`} fill={color} />
+          </svg>
+        )
+      default:
+        return <div className="rounded-full flex-shrink-0" style={{ backgroundColor: color, width: size, height: size }} />
+    }
+  }
 
   const features: Feature[] = [
     {
@@ -157,10 +193,7 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
                 {mortgageTypes.map((type) => (
                   <TableHead key={type} className="text-center min-w-[140px]">
                     <div className="flex flex-col items-center gap-1">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: MORTGAGE_CONFIGS[type].color }}
-                      />
+                      {renderShapeIndicator(type, 12)}
                       <span>{MORTGAGE_CONFIGS[type].shortName}</span>
                     </div>
                   </TableHead>
