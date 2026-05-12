@@ -9,6 +9,8 @@ import {
   type ProjectionData,
   formatCurrency,
   calculateAge,
+  yearToScaledPosition,
+  getScaledXAxisTicks,
 } from "@/lib/mortgage-calculations"
 import {
   AreaChart,
@@ -41,10 +43,14 @@ export function IncomeProjection({
 }: IncomeProjectionProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
 
+  // Get scaled x-axis ticks
+  const scaledTicks = getScaledXAxisTicks()
+
   // Create data combining income with monthly payments for each mortgage type
   const combinedData = projections.retirement.map((data, index) => {
     const baseData: Record<string, number> = {
       year: data.year,
+      scaledX: yearToScaledPosition(data.year),
       age: data.age,
       income: data.income,
     }
@@ -89,15 +95,16 @@ export function IncomeProjection({
   // Unique years for reference lines (no labels on chart)
   const uniqueRetirementYears = [...new Set(retirementMarkers.map(m => m.year))]
 
-  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string; dataKey: string }>; label?: string }) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string; dataKey: string; payload: { year: number } }> }) => {
     if (active && payload && payload.length) {
       const incomeItem = payload.find((p) => p.dataKey === "income")
-      const yearData = combinedData.find(d => d.year === Number(label))
+      const year = payload[0]?.payload?.year
+      const yearData = combinedData.find(d => d.year === year)
       
       return (
         <div className="bg-card border border-border rounded-lg shadow-lg p-3">
           <p className="font-medium text-foreground mb-2">
-            Year {label} {yearData && `(Age ${yearData.age})`}
+            Year {year} {yearData && `(Age ${yearData.age})`}
           </p>
           {incomeItem && (
             <div className="flex items-center gap-2 text-sm mb-2 pb-2 border-b border-border">
@@ -159,7 +166,7 @@ export function IncomeProjection({
                 <div 
                   key={index} 
                   className="absolute text-center -translate-x-1/2"
-                  style={{ left: `${(label.years / 40) * 100}%` }}
+                  style={{ left: `${yearToScaledPosition(label.years)}%` }}
                 >
                   <p className="text-xs font-medium" style={{ color: '#dc2626' }}>{label.title}</p>
                   <p className="text-xs" style={{ color: '#dc2626', opacity: 0.8 }}>In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
@@ -178,9 +185,15 @@ export function IncomeProjection({
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis
-                dataKey="year"
+                dataKey="scaledX"
+                type="number"
+                domain={[0, 100]}
+                ticks={scaledTicks.map(t => t.value)}
                 tick={{ fontSize: 12, fill: "#6b7280" }}
-                tickFormatter={(value) => `Y${value}`}
+                tickFormatter={(value) => {
+                  const tick = scaledTicks.find(t => Math.abs(t.value - value) < 0.1)
+                  return tick?.label || ''
+                }}
                 axisLine={{ stroke: "#d1d5db" }}
                 tickLine={{ stroke: "#d1d5db" }}
               />
@@ -200,7 +213,7 @@ export function IncomeProjection({
               {uniqueRetirementYears.map((year, index) => (
                 <ReferenceLine
                   key={index}
-                  x={year}
+                  x={yearToScaledPosition(year)}
                   stroke="#dc2626"
                   strokeDasharray="5 5"
                   strokeWidth={2}
@@ -209,7 +222,7 @@ export function IncomeProjection({
 
               {/* Selected year indicator */}
               <ReferenceLine
-                x={selectedYear}
+                x={yearToScaledPosition(selectedYear)}
                 stroke="#1e40af"
                 strokeDasharray="3 3"
                 strokeWidth={1}

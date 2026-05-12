@@ -311,3 +311,48 @@ export function formatCurrency(value: number): string {
     maximumFractionDigits: 0,
   }).format(value)
 }
+
+// Non-linear x-axis scaling: Years 0-10 take 60% of width, years 11-40 take 40%
+const FOCUS_YEARS = 10
+const FOCUS_PORTION = 0.6 // 60% of chart width for first 10 years
+const TOTAL_YEARS = 40
+
+export function yearToScaledPosition(year: number): number {
+  if (year <= FOCUS_YEARS) {
+    // Linear scale for 0-10, taking up 60% of width
+    return (year / FOCUS_YEARS) * FOCUS_PORTION * 100
+  } else {
+    // Linear scale for 11-40, taking up remaining 40% of width
+    const remainingYears = year - FOCUS_YEARS
+    const totalRemainingYears = TOTAL_YEARS - FOCUS_YEARS
+    return (FOCUS_PORTION + (remainingYears / totalRemainingYears) * (1 - FOCUS_PORTION)) * 100
+  }
+}
+
+export function scaledPositionToYear(position: number): number {
+  const normalizedPos = position / 100
+  if (normalizedPos <= FOCUS_PORTION) {
+    return (normalizedPos / FOCUS_PORTION) * FOCUS_YEARS
+  } else {
+    const remainingPortion = normalizedPos - FOCUS_PORTION
+    const remainingYears = (remainingPortion / (1 - FOCUS_PORTION)) * (TOTAL_YEARS - FOCUS_YEARS)
+    return FOCUS_YEARS + remainingYears
+  }
+}
+
+// Generate custom ticks for the non-linear scale
+export function getScaledXAxisTicks(): { value: number; label: string }[] {
+  const ticks: { value: number; label: string }[] = []
+  
+  // Every year for 0-10
+  for (let year = 0; year <= 10; year += 2) {
+    ticks.push({ value: yearToScaledPosition(year), label: `Y${year}` })
+  }
+  
+  // Every 5 years for 15-40
+  for (let year = 15; year <= 40; year += 5) {
+    ticks.push({ value: yearToScaledPosition(year), label: `Y${year}` })
+  }
+  
+  return ticks
+}

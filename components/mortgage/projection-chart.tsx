@@ -10,6 +10,8 @@ import {
   type ProjectionData,
   formatCurrency,
   calculateAge,
+  yearToScaledPosition,
+  getScaledXAxisTicks,
 } from "@/lib/mortgage-calculations"
 import {
   LineChart,
@@ -72,10 +74,15 @@ export function ProjectionChart({
   // Unique years for reference lines (no labels on chart)
   const uniqueRetirementYears = [...new Set(retirementMarkers.map(m => m.year))]
 
-  // Combine data for multi-line chart
+  // Get scaled x-axis ticks
+  const scaledTicks = getScaledXAxisTicks()
+
+  // Combine data for multi-line chart with scaled x position
   const combinedData = projections.retirement.map((_, index) => {
+    const year = projections.retirement[index].year
     const dataPoint: Record<string, number> = {
-      year: projections.retirement[index].year,
+      year: year,
+      scaledX: yearToScaledPosition(year),
       age: projections.retirement[index].age,
       propertyValue: projections.retirement[index].propertyValue,
     }
@@ -88,11 +95,12 @@ export function ProjectionChart({
     return dataPoint
   })
 
-  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string; payload: { year: number } }> }) => {
     if (active && payload && payload.length) {
+      const year = payload[0]?.payload?.year
       return (
         <div className="bg-card border border-border rounded-lg shadow-lg p-3">
-          <p className="font-medium text-foreground mb-2">Year {label}</p>
+          <p className="font-medium text-foreground mb-2">Year {year}</p>
           {payload.map((entry, index) => (
             <div key={index} className="flex items-center gap-2 text-sm">
               <div
@@ -142,7 +150,7 @@ export function ProjectionChart({
                     <div 
                       key={index} 
                       className="absolute text-center -translate-x-1/2"
-                      style={{ left: `${(label.years / 40) * 100}%` }}
+                      style={{ left: `${yearToScaledPosition(label.years)}%` }}
                     >
                       <p className="text-xs font-medium" style={{ color: '#dc2626' }}>{label.title}</p>
                       <p className="text-xs" style={{ color: '#dc2626', opacity: 0.8 }}>In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
@@ -178,9 +186,15 @@ export function ProjectionChart({
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
-                    dataKey="year"
+                    dataKey="scaledX"
+                    type="number"
+                    domain={[0, 100]}
+                    ticks={scaledTicks.map(t => t.value)}
                     tick={{ fontSize: 12, fill: "#6b7280" }}
-                    tickFormatter={(value) => `Y${value}`}
+                    tickFormatter={(value) => {
+                      const tick = scaledTicks.find(t => Math.abs(t.value - value) < 0.1)
+                      return tick?.label || ''
+                    }}
                     axisLine={{ stroke: "#d1d5db" }}
                     tickLine={{ stroke: "#d1d5db" }}
                   />
@@ -199,14 +213,14 @@ export function ProjectionChart({
                   {uniqueRetirementYears.map((year, index) => (
                     <ReferenceLine
                       key={`retirement-${index}`}
-                      x={year}
+                      x={yearToScaledPosition(year)}
                       stroke="#dc2626"
                       strokeDasharray="5 5"
                       strokeWidth={2}
                     />
                   ))}
                   <ReferenceLine
-                    x={selectedYear}
+                    x={yearToScaledPosition(selectedYear)}
                     stroke="#1e40af"
                     strokeDasharray="5 5"
                     strokeWidth={2}
@@ -237,7 +251,7 @@ export function ProjectionChart({
                     <div 
                       key={index} 
                       className="absolute text-center -translate-x-1/2"
-                      style={{ left: `${(label.years / 40) * 100}%` }}
+                      style={{ left: `${yearToScaledPosition(label.years)}%` }}
                     >
                       <p className="text-xs font-medium" style={{ color: '#dc2626' }}>{label.title}</p>
                       <p className="text-xs" style={{ color: '#dc2626', opacity: 0.8 }}>In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
@@ -250,9 +264,15 @@ export function ProjectionChart({
                 <LineChart data={combinedData} onClick={handleChartClick} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
-                    dataKey="year"
+                    dataKey="scaledX"
+                    type="number"
+                    domain={[0, 100]}
+                    ticks={scaledTicks.map(t => t.value)}
                     tick={{ fontSize: 12, fill: "#6b7280" }}
-                    tickFormatter={(value) => `Y${value}`}
+                    tickFormatter={(value) => {
+                      const tick = scaledTicks.find(t => Math.abs(t.value - value) < 0.1)
+                      return tick?.label || ''
+                    }}
                     axisLine={{ stroke: "#d1d5db" }}
                     tickLine={{ stroke: "#d1d5db" }}
                   />
@@ -271,14 +291,14 @@ export function ProjectionChart({
                   {uniqueRetirementYears.map((year, index) => (
                     <ReferenceLine
                       key={`retirement-${index}`}
-                      x={year}
+                      x={yearToScaledPosition(year)}
                       stroke="#dc2626"
                       strokeDasharray="5 5"
                       strokeWidth={2}
                     />
                   ))}
                   <ReferenceLine
-                    x={selectedYear}
+                    x={yearToScaledPosition(selectedYear)}
                     stroke="#1e40af"
                     strokeDasharray="5 5"
                     strokeWidth={2}
@@ -310,7 +330,7 @@ export function ProjectionChart({
                     <div 
                       key={index} 
                       className="absolute text-center -translate-x-1/2"
-                      style={{ left: `${(label.years / 40) * 100}%` }}
+                      style={{ left: `${yearToScaledPosition(label.years)}%` }}
                     >
                       <p className="text-xs font-medium" style={{ color: '#dc2626' }}>{label.title}</p>
                       <p className="text-xs" style={{ color: '#dc2626', opacity: 0.8 }}>In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
@@ -329,9 +349,15 @@ export function ProjectionChart({
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
-                    dataKey="year"
+                    dataKey="scaledX"
+                    type="number"
+                    domain={[0, 100]}
+                    ticks={scaledTicks.map(t => t.value)}
                     tick={{ fontSize: 12, fill: "#6b7280" }}
-                    tickFormatter={(value) => `Y${value}`}
+                    tickFormatter={(value) => {
+                      const tick = scaledTicks.find(t => Math.abs(t.value - value) < 0.1)
+                      return tick?.label || ''
+                    }}
                     axisLine={{ stroke: "#d1d5db" }}
                     tickLine={{ stroke: "#d1d5db" }}
                   />
@@ -350,14 +376,14 @@ export function ProjectionChart({
                   {uniqueRetirementYears.map((year, index) => (
                     <ReferenceLine
                       key={`retirement-${index}`}
-                      x={year}
+                      x={yearToScaledPosition(year)}
                       stroke="#dc2626"
                       strokeDasharray="5 5"
                       strokeWidth={2}
                     />
                   ))}
                   <ReferenceLine
-                    x={selectedYear}
+                    x={yearToScaledPosition(selectedYear)}
                     stroke="#1e40af"
                     strokeDasharray="5 5"
                     strokeWidth={2}
