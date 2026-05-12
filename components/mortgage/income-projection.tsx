@@ -46,13 +46,17 @@ export function IncomeProjection({
   // Get scaled x-axis ticks
   const scaledTicks = getScaledXAxisTicks()
 
+  // Calculate current ages for each applicant
+  const applicantCurrentAges = applicants.map(a => calculateAge(a.dateOfBirth))
+
   // Create data combining income with monthly payments for each mortgage type
   const combinedData = projections.retirement.map((data, index) => {
-    const baseData: Record<string, number> = {
+    const baseData: Record<string, number | number[]> = {
       year: data.year,
       scaledX: yearToScaledPosition(data.year),
       age: data.age,
       income: data.income,
+      applicantAges: applicantCurrentAges.map(currentAge => currentAge + data.year),
     }
 
     mortgageTypes.forEach((type) => {
@@ -95,16 +99,24 @@ export function IncomeProjection({
   // Unique years for reference lines (no labels on chart)
   const uniqueRetirementYears = [...new Set(retirementMarkers.map(m => m.year))]
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string; dataKey: string; payload: { year: number } }> }) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string; dataKey: string; payload: { year: number; applicantAges?: number[] } }> }) => {
     if (active && payload && payload.length) {
       const incomeItem = payload.find((p) => p.dataKey === "income")
       const year = payload[0]?.payload?.year
+      const applicantAges = payload[0]?.payload?.applicantAges || []
       const yearData = combinedData.find(d => d.year === year)
+      
+      // Format ages display
+      const agesDisplay = applicantAges.length > 0 
+        ? applicantAges.length === 1 
+          ? `Age ${applicantAges[0]}`
+          : `Ages ${applicantAges[0]} & ${applicantAges[1]}`
+        : yearData ? `Age ${yearData.age}` : ''
       
       return (
         <div className="bg-card border border-border rounded-lg shadow-lg p-3">
           <p className="font-medium text-foreground mb-2">
-            Year {year} {yearData && `(Age ${yearData.age})`}
+            Year {year} {agesDisplay && `(${agesDisplay})`}
           </p>
           {incomeItem && (
             <div className="flex items-center gap-2 text-sm mb-2 pb-2 border-b border-border">
