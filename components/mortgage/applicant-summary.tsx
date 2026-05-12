@@ -29,11 +29,11 @@ export function ApplicantSummary({
   const isEditable = !!onApplicantChange && !!onPropertyChange
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="gap-2 py-4">
+      <CardHeader>
         <CardTitle className="text-lg">Application Summary</CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Applicants */}
           {applicants.map((applicant, index) => {
