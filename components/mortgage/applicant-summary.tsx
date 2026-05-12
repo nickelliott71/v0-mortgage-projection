@@ -34,7 +34,7 @@ export function ApplicantSummary({
         <CardTitle className="text-lg">Application Summary</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Applicants */}
           {applicants.map((applicant, index) => {
             const currentAge = calculateAge(applicant.dateOfBirth)
