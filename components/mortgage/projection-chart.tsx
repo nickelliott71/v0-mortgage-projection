@@ -48,21 +48,29 @@ export function ProjectionChart({
     const yearsToRetirement = applicant.plannedRetirementAge - applicantAge
     return {
       year: yearsToRetirement,
-      label: `Applicant ${index + 1} Retires`,
+      applicantIndex: index + 1,
       age: applicant.plannedRetirementAge,
     }
   }).filter(marker => marker.year > 0 && marker.year <= 40)
+    .sort((a, b) => a.year - b.year)
 
-  // Deduplicate markers at same year
-  const uniqueRetirementMarkers = retirementMarkers.reduce((acc, marker) => {
-    const existing = acc.find(m => m.year === marker.year)
-    if (existing) {
-      existing.label = "Both Retire"
-    } else {
-      acc.push(marker)
+  // Create display labels for above chart
+  const retirementLabels: { title: string; years: number }[] = []
+  
+  if (retirementMarkers.length === 2 && retirementMarkers[0].year === retirementMarkers[1].year) {
+    // Both retire at same time
+    retirementLabels.push({ title: "Both retired", years: retirementMarkers[0].year })
+  } else if (retirementMarkers.length >= 1) {
+    // First retirement
+    retirementLabels.push({ title: "First retirement", years: retirementMarkers[0].year })
+    if (retirementMarkers.length === 2) {
+      // Both retired (second person)
+      retirementLabels.push({ title: "Both retired", years: retirementMarkers[1].year })
     }
-    return acc
-  }, [] as typeof retirementMarkers)
+  }
+
+  // Unique years for reference lines (no labels on chart)
+  const uniqueRetirementYears = [...new Set(retirementMarkers.map(m => m.year))]
 
   // Combine data for multi-line chart
   const combinedData = projections.retirement.map((_, index) => {
@@ -119,6 +127,18 @@ export function ProjectionChart({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="equity" className="space-y-4">
+          {/* Retirement labels above chart */}
+          {retirementLabels.length > 0 && (
+            <div className="flex items-center gap-8 pb-2">
+              {retirementLabels.map((label, index) => (
+                <div key={index} className="text-center">
+                  <p className="text-sm font-medium text-foreground">{label.title}</p>
+                  <p className="text-sm text-muted-foreground">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
           <TabsList className="grid w-full max-w-md grid-cols-3">
             <TabsTrigger value="equity">Equity</TabsTrigger>
             <TabsTrigger value="balance">Loan Balance</TabsTrigger>
@@ -171,21 +191,14 @@ export function ProjectionChart({
                     wrapperStyle={{ paddingTop: "20px" }}
                     formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
                   />
-                  {/* Retirement reference lines for each applicant */}
-                  {uniqueRetirementMarkers.map((marker, index) => (
+                  {/* Retirement reference lines */}
+                  {uniqueRetirementYears.map((year, index) => (
                     <ReferenceLine
                       key={`retirement-${index}`}
-                      x={marker.year}
+                      x={year}
                       stroke="#dc2626"
                       strokeDasharray="5 5"
                       strokeWidth={2}
-                      label={{
-                        value: marker.label,
-                        position: "insideTopRight",
-                        fill: "#dc2626",
-                        fontSize: 10,
-                        fontWeight: 500,
-                      }}
                     />
                   ))}
                   <ReferenceLine
@@ -193,13 +206,6 @@ export function ProjectionChart({
                     stroke="#1e40af"
                     strokeDasharray="5 5"
                     strokeWidth={2}
-                    label={{
-                      value: `Year ${selectedYear}`,
-                      position: "top",
-                      fill: "#1e40af",
-                      fontSize: 12,
-                      fontWeight: 500,
-                    }}
                   />
                   {mortgageTypes.map((type) => (
                     <Area
@@ -240,21 +246,14 @@ export function ProjectionChart({
                     wrapperStyle={{ paddingTop: "20px" }}
                     formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
                   />
-                  {/* Retirement reference lines for each applicant */}
-                  {uniqueRetirementMarkers.map((marker, index) => (
+                  {/* Retirement reference lines */}
+                  {uniqueRetirementYears.map((year, index) => (
                     <ReferenceLine
                       key={`retirement-${index}`}
-                      x={marker.year}
+                      x={year}
                       stroke="#dc2626"
                       strokeDasharray="5 5"
                       strokeWidth={2}
-                      label={{
-                        value: marker.label,
-                        position: "insideTopRight",
-                        fill: "#dc2626",
-                        fontSize: 10,
-                        fontWeight: 500,
-                      }}
                     />
                   ))}
                   <ReferenceLine
@@ -262,13 +261,6 @@ export function ProjectionChart({
                     stroke="#1e40af"
                     strokeDasharray="5 5"
                     strokeWidth={2}
-                    label={{
-                      value: `Year ${selectedYear}`,
-                      position: "top",
-                      fill: "#1e40af",
-                      fontSize: 12,
-                      fontWeight: 500,
-                    }}
                   />
                   {mortgageTypes.map((type) => (
                     <Line
@@ -316,21 +308,14 @@ export function ProjectionChart({
                     wrapperStyle={{ paddingTop: "20px" }}
                     formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
                   />
-                  {/* Retirement reference lines for each applicant */}
-                  {uniqueRetirementMarkers.map((marker, index) => (
+                  {/* Retirement reference lines */}
+                  {uniqueRetirementYears.map((year, index) => (
                     <ReferenceLine
                       key={`retirement-${index}`}
-                      x={marker.year}
+                      x={year}
                       stroke="#dc2626"
                       strokeDasharray="5 5"
                       strokeWidth={2}
-                      label={{
-                        value: marker.label,
-                        position: "insideTopRight",
-                        fill: "#dc2626",
-                        fontSize: 10,
-                        fontWeight: 500,
-                      }}
                     />
                   ))}
                   <ReferenceLine
@@ -338,13 +323,6 @@ export function ProjectionChart({
                     stroke="#1e40af"
                     strokeDasharray="5 5"
                     strokeWidth={2}
-                    label={{
-                      value: `Year ${selectedYear}`,
-                      position: "top",
-                      fill: "#1e40af",
-                      fontSize: 12,
-                      fontWeight: 500,
-                    }}
                   />
                   <Area
                     type="monotone"
