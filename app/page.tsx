@@ -14,7 +14,7 @@ import {
   generateHouseholdProjections,
   calculateAge,
 } from "@/lib/mortgage-calculations"
-import { Building2, TrendingUp, FileText } from "lucide-react"
+import { Building2 } from "lucide-react"
 
 // Initial data from the form (matching the provided screenshot)
 const initialApplicants: ApplicantData[] = [
@@ -99,25 +99,13 @@ export default function MortgageProjectionPage() {
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-                <Building2 className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Later Life Mortgage Comparison</h1>
-                <p className="text-sm text-muted-foreground">40-Year Projection Dashboard</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+              <Building2 className="h-5 w-5 text-primary-foreground" />
             </div>
-            <div className="hidden md:flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <TrendingUp className="h-4 w-4" />
-                <span>Compare 4 UK mortgage types</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <FileText className="h-4 w-4" />
-                <span>For brokers</span>
-              </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Later Life Mortgage Comparison</h1>
+              <p className="text-sm text-muted-foreground">40-Year Projection Dashboard</p>
             </div>
           </div>
         </div>

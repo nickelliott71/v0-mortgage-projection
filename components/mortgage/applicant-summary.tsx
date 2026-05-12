@@ -31,14 +31,7 @@ export function ApplicantSummary({
   return (
     <Card>
       <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Application Summary</CardTitle>
-          {isEditable && (
-            <Badge variant="outline" className="text-xs">
-              Adjust values below
-            </Badge>
-          )}
-        </div>
+        <CardTitle className="text-lg">Application Summary</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
