@@ -106,8 +106,8 @@ export default function DataEntryPage() {
               <Building2 className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Later Life Mortgage Comparison</h1>
-              <p className="text-sm text-muted-foreground">40-Year Projection Tool</p>
+              <h1 className="text-xl font-bold text-foreground">Later life mortgage comparison</h1>
+              <p className="text-sm text-muted-foreground">40-year projection tool</p>
             </div>
           </div>
         </div>
