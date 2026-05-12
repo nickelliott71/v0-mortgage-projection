@@ -59,15 +59,15 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
         const config = MORTGAGE_CONFIGS[type]
         if (config.monthlyPaymentType === "none") {
           return (
-            <span className="flex items-center gap-1 text-green-600">
-              <Check className="h-4 w-4" /> None required
+            <span className="inline-flex items-center justify-center gap-1 text-green-600">
+              <Check className="h-4 w-4 flex-shrink-0" /> None required
             </span>
           )
         }
         if (config.monthlyPaymentType === "optional") {
           return (
-            <span className="flex items-center gap-1 text-amber-600">
-              <Minus className="h-4 w-4" /> Optional
+            <span className="inline-flex items-center justify-center gap-1 text-amber-600">
+              <Minus className="h-4 w-4 flex-shrink-0" /> Optional
             </span>
           )
         }
@@ -91,12 +91,12 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
       key: "proof",
       getValue: (type) =>
         type === "lifetime" || type === "homeReversion" ? (
-          <span className="flex items-center gap-1 text-green-600">
-            <X className="h-4 w-4" /> Not required
+          <span className="inline-flex items-center justify-center gap-1 text-green-600">
+            <X className="h-4 w-4 flex-shrink-0" /> Not required
           </span>
         ) : (
-          <span className="flex items-center gap-1 text-muted-foreground">
-            <Check className="h-4 w-4" /> Required
+          <span className="inline-flex items-center justify-center gap-1 text-muted-foreground">
+            <Check className="h-4 w-4 flex-shrink-0" /> Required
           </span>
         ),
     },
