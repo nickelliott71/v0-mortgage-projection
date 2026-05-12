@@ -39,13 +39,23 @@ export interface MortgageConfig {
   loanGrowth: "decreases" | "stable" | "increases" | "fixed"
 }
 
+// Accessible color palette - WCAG AA compliant with sufficient contrast
+// Colors chosen to be distinguishable for colorblind users (deuteranopia, protanopia, tritanopia)
+export const CHART_COLORS = {
+  retirement: "#1e40af", // Deep blue
+  rio: "#0d9488", // Teal
+  lifetime: "#c2410c", // Burnt orange
+  homeReversion: "#7c3aed", // Purple
+  property: "#059669", // Emerald green
+} as const
+
 export const MORTGAGE_CONFIGS: Record<MortgageType, MortgageConfig> = {
   retirement: {
     name: "Retirement Mortgage",
     shortName: "Retirement",
     interestRate: 0.055,
     description: "Fixed term, interest-only or capital & interest payments",
-    color: "hsl(var(--chart-1))",
+    color: CHART_COLORS.retirement,
     monthlyPaymentType: "capital-interest",
     loanGrowth: "decreases",
   },
@@ -54,7 +64,7 @@ export const MORTGAGE_CONFIGS: Record<MortgageType, MortgageConfig> = {
     shortName: "RIO",
     interestRate: 0.052,
     description: "Interest-only payments required, for life",
-    color: "hsl(var(--chart-2))",
+    color: CHART_COLORS.rio,
     monthlyPaymentType: "interest-only",
     loanGrowth: "stable",
   },
@@ -63,7 +73,7 @@ export const MORTGAGE_CONFIGS: Record<MortgageType, MortgageConfig> = {
     shortName: "Lifetime",
     interestRate: 0.065,
     description: "No monthly payments required, interest rolls up",
-    color: "hsl(var(--chart-3))",
+    color: CHART_COLORS.lifetime,
     monthlyPaymentType: "optional",
     loanGrowth: "increases",
   },
@@ -72,7 +82,7 @@ export const MORTGAGE_CONFIGS: Record<MortgageType, MortgageConfig> = {
     shortName: "Reversion",
     interestRate: 0,
     description: "Sell part of home, no loan balance",
-    color: "hsl(var(--chart-4))",
+    color: CHART_COLORS.homeReversion,
     monthlyPaymentType: "none",
     loanGrowth: "fixed",
   },

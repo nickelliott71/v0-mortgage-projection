@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import {
   type MortgageType,
   MORTGAGE_CONFIGS,
+  CHART_COLORS,
   type ProjectionData,
   formatCurrency,
 } from "@/lib/mortgage-calculations"
@@ -113,37 +114,43 @@ export function IncomeProjection({
             <ComposedChart data={combinedData}>
               <defs>
                 <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#059669" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#059669" stopOpacity={0.02} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis
                 dataKey="year"
-                className="text-muted-foreground"
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: "#6b7280" }}
                 tickFormatter={(value) => `Y${value}`}
+                axisLine={{ stroke: "#d1d5db" }}
+                tickLine={{ stroke: "#d1d5db" }}
               />
               <YAxis
-                className="text-muted-foreground"
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: "#6b7280" }}
                 tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
+                axisLine={{ stroke: "#d1d5db" }}
+                tickLine={{ stroke: "#d1d5db" }}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
+              <Legend 
+                wrapperStyle={{ paddingTop: "20px" }}
+                formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
+              />
               
               {/* Retirement reference line */}
               {retirementYear > 0 && retirementYear <= 40 && (
                 <ReferenceLine
                   x={retirementYear}
-                  stroke="hsl(var(--destructive))"
+                  stroke="#dc2626"
                   strokeDasharray="5 5"
                   strokeWidth={2}
                   label={{
                     value: "Retirement",
                     position: "top",
-                    fill: "hsl(var(--destructive))",
+                    fill: "#dc2626",
                     fontSize: 11,
+                    fontWeight: 500,
                   }}
                 />
               )}
@@ -151,7 +158,7 @@ export function IncomeProjection({
               {/* Selected year indicator */}
               <ReferenceLine
                 x={selectedYear}
-                stroke="hsl(var(--primary))"
+                stroke="#1e40af"
                 strokeDasharray="3 3"
                 strokeWidth={1}
               />
@@ -161,9 +168,9 @@ export function IncomeProjection({
                 type="monotone"
                 dataKey="income"
                 name="Gross Income"
-                stroke="hsl(var(--primary))"
+                stroke="#059669"
                 fill="url(#incomeGradient)"
-                strokeWidth={2}
+                strokeWidth={3}
               />
 
               {/* Payment bars for each mortgage type */}
@@ -173,8 +180,8 @@ export function IncomeProjection({
                   dataKey={`${type}Payment`}
                   name={`${MORTGAGE_CONFIGS[type].shortName} Payments`}
                   fill={MORTGAGE_CONFIGS[type].color}
-                  opacity={0.7}
-                  barSize={8}
+                  opacity={0.85}
+                  barSize={10}
                 />
               ))}
             </ComposedChart>

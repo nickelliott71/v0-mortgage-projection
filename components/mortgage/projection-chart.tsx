@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   type MortgageType,
   MORTGAGE_CONFIGS,
+  CHART_COLORS,
   type ProjectionData,
   formatCurrency,
 } from "@/lib/mortgage-calculations"
@@ -115,40 +116,46 @@ export function ProjectionChart({
                         <stop
                           offset="5%"
                           stopColor={MORTGAGE_CONFIGS[type].color}
-                          stopOpacity={0.3}
+                          stopOpacity={0.25}
                         />
                         <stop
                           offset="95%"
                           stopColor={MORTGAGE_CONFIGS[type].color}
-                          stopOpacity={0}
+                          stopOpacity={0.02}
                         />
                       </linearGradient>
                     ))}
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
                     dataKey="year"
-                    className="text-muted-foreground"
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
                     tickFormatter={(value) => `Y${value}`}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
                   />
                   <YAxis
-                    className="text-muted-foreground"
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
                     tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Legend />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: "20px" }}
+                    formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
+                  />
                   <ReferenceLine
                     x={selectedYear}
-                    stroke="hsl(var(--primary))"
+                    stroke="#1e40af"
                     strokeDasharray="5 5"
                     strokeWidth={2}
                     label={{
                       value: `Year ${selectedYear}`,
                       position: "top",
-                      fill: "hsl(var(--primary))",
+                      fill: "#1e40af",
                       fontSize: 12,
+                      fontWeight: 500,
                     }}
                   />
                   {mortgageTypes.map((type) => (
@@ -159,7 +166,7 @@ export function ProjectionChart({
                       name={MORTGAGE_CONFIGS[type].shortName}
                       stroke={MORTGAGE_CONFIGS[type].color}
                       fill={`url(#gradient-${type})`}
-                      strokeWidth={2}
+                      strokeWidth={3}
                     />
                   ))}
                 </AreaChart>
@@ -171,25 +178,37 @@ export function ProjectionChart({
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={combinedData} onClick={handleChartClick}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
                     dataKey="year"
-                    className="text-muted-foreground"
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
                     tickFormatter={(value) => `Y${value}`}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
                   />
                   <YAxis
-                    className="text-muted-foreground"
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
                     tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Legend />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: "20px" }}
+                    formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
+                  />
                   <ReferenceLine
                     x={selectedYear}
-                    stroke="hsl(var(--primary))"
+                    stroke="#1e40af"
                     strokeDasharray="5 5"
                     strokeWidth={2}
+                    label={{
+                      value: `Year ${selectedYear}`,
+                      position: "top",
+                      fill: "#1e40af",
+                      fontSize: 12,
+                      fontWeight: 500,
+                    }}
                   />
                   {mortgageTypes.map((type) => (
                     <Line
@@ -198,8 +217,9 @@ export function ProjectionChart({
                       dataKey={`${type}Balance`}
                       name={MORTGAGE_CONFIGS[type].shortName}
                       stroke={MORTGAGE_CONFIGS[type].color}
-                      strokeWidth={2}
+                      strokeWidth={3}
                       dot={false}
+                      activeDot={{ r: 6, strokeWidth: 2, fill: "#fff" }}
                     />
                   ))}
                 </LineChart>
@@ -213,37 +233,49 @@ export function ProjectionChart({
                 <AreaChart data={combinedData} onClick={handleChartClick}>
                   <defs>
                     <linearGradient id="propertyGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
+                      <stop offset="5%" stopColor={CHART_COLORS.property} stopOpacity={0.4} />
+                      <stop offset="95%" stopColor={CHART_COLORS.property} stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
                     dataKey="year"
-                    className="text-muted-foreground"
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
                     tickFormatter={(value) => `Y${value}`}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
                   />
                   <YAxis
-                    className="text-muted-foreground"
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
                     tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Legend />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: "20px" }}
+                    formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
+                  />
                   <ReferenceLine
                     x={selectedYear}
-                    stroke="hsl(var(--primary))"
+                    stroke="#1e40af"
                     strokeDasharray="5 5"
                     strokeWidth={2}
+                    label={{
+                      value: `Year ${selectedYear}`,
+                      position: "top",
+                      fill: "#1e40af",
+                      fontSize: 12,
+                      fontWeight: 500,
+                    }}
                   />
                   <Area
                     type="monotone"
                     dataKey="propertyValue"
                     name="Property Value"
-                    stroke="hsl(var(--accent))"
+                    stroke={CHART_COLORS.property}
                     fill="url(#propertyGradient)"
-                    strokeWidth={2}
+                    strokeWidth={3}
                   />
                 </AreaChart>
               </ResponsiveContainer>
