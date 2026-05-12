@@ -9,14 +9,14 @@ interface YearSelectorProps {
   selectedYear: number
   onYearChange: (year: number) => void
   maxYears: number
-  currentAge: number
+  applicantAges: number[]
 }
 
 export function YearSelector({
   selectedYear,
   onYearChange,
   maxYears,
-  currentAge,
+  applicantAges,
 }: YearSelectorProps) {
   return (
     <Card className="bg-primary text-primary-foreground">
@@ -39,7 +39,10 @@ export function YearSelector({
                 <span className="text-sm font-medium">Year {selectedYear}</span>
               </div>
               <span className="text-sm text-primary-foreground/80">
-                Age {currentAge + selectedYear}
+                {applicantAges.length === 1 
+                  ? `Age ${applicantAges[0] + selectedYear}`
+                  : `Ages ${applicantAges[0] + selectedYear} & ${applicantAges[1] + selectedYear}`
+                }
               </span>
             </div>
 

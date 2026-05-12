@@ -166,7 +166,7 @@ export default function MortgageProjectionPage() {
           selectedYear={selectedYear}
           onYearChange={setSelectedYear}
           maxYears={maxYears}
-          currentAge={currentAge}
+          applicantAges={applicants.map(a => calculateAge(a.dateOfBirth))}
         />
 
         {/* Summary Cards */}
