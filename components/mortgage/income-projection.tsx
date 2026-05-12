@@ -3,10 +3,12 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
   type MortgageType,
+  type ApplicantData,
   MORTGAGE_CONFIGS,
   CHART_COLORS,
   type ProjectionData,
   formatCurrency,
+  calculateAge,
 } from "@/lib/mortgage-calculations"
 import {
   AreaChart,
@@ -27,6 +29,7 @@ interface IncomeProjectionProps {
   selectedYear: number
   retirementAge: number
   currentAge: number
+  applicants?: ApplicantData[]
 }
 
 export function IncomeProjection({
@@ -34,6 +37,7 @@ export function IncomeProjection({
   selectedYear,
   retirementAge,
   currentAge,
+  applicants = [],
 }: IncomeProjectionProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
 
@@ -58,38 +62,71 @@ export function IncomeProjection({
     return baseData
   })
 
-  const retirementYear = Math.max(0, retirementAge - currentAge)
+  // Calculate retirement years for each applicant
+  const retirementMarkers = applicants.map((applicant, index) => {
+    const applicantAge = calculateAge(applicant.dateOfBirth)
+    const yearsToRetirement = applicant.plannedRetirementAge - applicantAge
+    return {
+      year: yearsToRetirement,
+      label: `Applicant ${index + 1} Retires`,
+      age: applicant.plannedRetirementAge,
+    }
+  }).filter(marker => marker.year > 0 && marker.year <= 40)
+
+  // Deduplicate markers at same year
+  const uniqueMarkers = retirementMarkers.reduce((acc, marker) => {
+    const existing = acc.find(m => m.year === marker.year)
+    if (existing) {
+      existing.label = "Both Retire"
+    } else {
+      acc.push(marker)
+    }
+    return acc
+  }, [] as typeof retirementMarkers)
 
   const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string; dataKey: string }>; label?: string }) => {
     if (active && payload && payload.length) {
       const incomeItem = payload.find((p) => p.dataKey === "income")
+      const yearData = combinedData.find(d => d.year === Number(label))
+      
       return (
         <div className="bg-card border border-border rounded-lg shadow-lg p-3">
-          <p className="font-medium text-foreground mb-2">Year {label}</p>
+          <p className="font-medium text-foreground mb-2">
+            Year {label} {yearData && `(Age ${yearData.age})`}
+          </p>
           {incomeItem && (
             <div className="flex items-center gap-2 text-sm mb-2 pb-2 border-b border-border">
-              <span className="text-muted-foreground">Gross Income:</span>
-              <span className="font-medium text-foreground">
-                {formatCurrency(incomeItem.value)}
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#059669" }} />
+              <span className="text-muted-foreground">Household Income:</span>
+              <span className="font-semibold text-foreground">
+                {formatCurrency(incomeItem.value)}/yr
               </span>
             </div>
           )}
-          <p className="text-xs text-muted-foreground mb-1">Annual Payments:</p>
+          <p className="text-xs text-muted-foreground mb-1">Annual Mortgage Payments:</p>
           {payload
             .filter((p) => p.dataKey.includes("Payment"))
             .map((entry, index) => {
               const typeName = entry.dataKey.replace("Payment", "")
               const config = MORTGAGE_CONFIGS[typeName as MortgageType]
+              const netIncome = yearData ? yearData[`${typeName}NetIncome`] : 0
               return (
-                <div key={index} className="flex items-center gap-2 text-sm">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: config.color }}
-                  />
-                  <span className="text-muted-foreground">{config.shortName}:</span>
-                  <span className="font-medium text-foreground">
-                    {formatCurrency(entry.value)}
-                  </span>
+                <div key={index} className="flex items-center justify-between gap-4 text-sm py-0.5">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-3 h-3 rounded-sm"
+                      style={{ backgroundColor: config.color }}
+                    />
+                    <span className="text-muted-foreground">{config.shortName}:</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-medium text-foreground">
+                      {formatCurrency(entry.value)}
+                    </span>
+                    <span className="text-xs text-muted-foreground ml-1">
+                      (Net: {formatCurrency(netIncome)})
+                    </span>
+                  </div>
                 </div>
               )
             })}
@@ -102,14 +139,14 @@ export function IncomeProjection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Income vs. Monthly Payments</CardTitle>
+        <CardTitle>Household Income vs. Annual Mortgage Payments</CardTitle>
         <CardDescription>
-          See how mortgage payments impact your annual income over time. The dashed line shows
-          retirement age.
+          Combined household income from all applicants, with annual mortgage payments for each type. 
+          Income transitions to pension income at each applicant&apos;s retirement age.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[350px]">
+        <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={combinedData}>
               <defs>
@@ -138,22 +175,23 @@ export function IncomeProjection({
                 formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
               />
               
-              {/* Retirement reference line */}
-              {retirementYear > 0 && retirementYear <= 40 && (
+              {/* Retirement reference lines for each applicant */}
+              {uniqueMarkers.map((marker, index) => (
                 <ReferenceLine
-                  x={retirementYear}
+                  key={index}
+                  x={marker.year}
                   stroke="#dc2626"
                   strokeDasharray="5 5"
                   strokeWidth={2}
                   label={{
-                    value: "Retirement",
+                    value: marker.label,
                     position: "top",
                     fill: "#dc2626",
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: 500,
                   }}
                 />
-              )}
+              ))}
 
               {/* Selected year indicator */}
               <ReferenceLine
@@ -167,7 +205,7 @@ export function IncomeProjection({
               <Area
                 type="monotone"
                 dataKey="income"
-                name="Gross Income"
+                name="Household Income"
                 stroke="#059669"
                 fill="url(#incomeGradient)"
                 strokeWidth={3}
@@ -178,7 +216,7 @@ export function IncomeProjection({
                 <Bar
                   key={type}
                   dataKey={`${type}Payment`}
-                  name={`${MORTGAGE_CONFIGS[type].shortName} Payments`}
+                  name={`${MORTGAGE_CONFIGS[type].shortName}`}
                   fill={MORTGAGE_CONFIGS[type].color}
                   opacity={0.85}
                   barSize={10}
@@ -195,23 +233,39 @@ export function IncomeProjection({
             const annualPayment = data.monthlyPayment * 12
             const paymentRatio =
               data.income > 0 ? ((annualPayment / data.income) * 100).toFixed(1) : "0"
+            const netIncome = data.income - annualPayment
 
             return (
-              <div key={type} className="text-center">
+              <div key={type} className="text-center p-3 rounded-lg bg-muted/30">
                 <div
-                  className="w-3 h-3 rounded-full mx-auto mb-1"
+                  className="w-4 h-4 rounded-sm mx-auto mb-2"
                   style={{ backgroundColor: MORTGAGE_CONFIGS[type].color }}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs font-medium text-foreground">
                   {MORTGAGE_CONFIGS[type].shortName}
                 </p>
-                <p className="text-lg font-semibold text-foreground">
+                <p className="text-lg font-bold text-foreground mt-1">
                   {paymentRatio}%
                 </p>
                 <p className="text-xs text-muted-foreground">of income</p>
+                <div className="mt-2 pt-2 border-t border-border/50">
+                  <p className="text-xs text-muted-foreground">Net Income</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {formatCurrency(netIncome)}/yr
+                  </p>
+                </div>
               </div>
             )
           })}
+        </div>
+
+        {/* Income breakdown note */}
+        <div className="mt-4 p-3 bg-muted/50 rounded-lg text-sm">
+          <p className="text-muted-foreground">
+            <span className="font-medium text-foreground">Year {selectedYear}:</span>{" "}
+            Household income is {formatCurrency(projections.retirement[selectedYear]?.income || 0)}/year.
+            {applicants.length > 1 && " This combines income from both applicants, accounting for individual retirement ages."}
+          </p>
         </div>
       </CardContent>
     </Card>

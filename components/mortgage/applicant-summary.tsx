@@ -2,112 +2,164 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
 import {
   type ApplicantData,
   type PropertyData,
   calculateAge,
   formatCurrency,
 } from "@/lib/mortgage-calculations"
-import { User, Home, Briefcase, Calendar, PoundSterling, Pencil } from "lucide-react"
+import { User, Home, Briefcase, Calendar, PoundSterling } from "lucide-react"
 
 interface ApplicantSummaryProps {
   applicants: ApplicantData[]
   property: PropertyData
-  onEdit?: () => void
+  onApplicantChange?: (index: number, updates: Partial<ApplicantData>) => void
+  onPropertyChange?: (updates: Partial<PropertyData>) => void
 }
 
 export function ApplicantSummary({
   applicants,
   property,
-  onEdit,
+  onApplicantChange,
+  onPropertyChange,
 }: ApplicantSummaryProps) {
+  const isEditable = !!onApplicantChange && !!onPropertyChange
+
   return (
     <Card>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Application Summary</CardTitle>
-          {onEdit && (
-            <Button variant="ghost" size="sm" onClick={onEdit}>
-              <Pencil className="h-4 w-4 mr-1" />
-              Edit
-            </Button>
+          {isEditable && (
+            <Badge variant="outline" className="text-xs">
+              Adjust values below
+            </Badge>
           )}
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Applicants */}
-          {applicants.map((applicant, index) => (
-            <div key={index} className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="h-4 w-4 text-primary" />
+          {applicants.map((applicant, index) => {
+            const currentAge = calculateAge(applicant.dateOfBirth)
+            const yearsToRetirement = applicant.plannedRetirementAge - currentAge
+            
+            return (
+              <div key={index} className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Applicant {index + 1}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {applicant.gender === "male" ? "Male" : "Female"} • Age {currentAge}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-foreground">Applicant {index + 1}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {applicant.gender === "male" ? "Male" : "Female"} •{" "}
-                    Age {calculateAge(applicant.dateOfBirth)}
-                  </p>
+
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Briefcase className="h-3 w-3" />
+                      Status
+                    </span>
+                    <Badge variant={applicant.employmentStatus === "working" ? "default" : "secondary"}>
+                      {applicant.employmentStatus === "working" ? "Working" : "Retired"}
+                    </Badge>
+                  </div>
+
+                  {/* Editable Retirement Age */}
+                  {isEditable ? (
+                    <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          Retirement Age
+                        </Label>
+                        <span className="text-sm font-semibold text-primary">
+                          {applicant.plannedRetirementAge}
+                        </span>
+                      </div>
+                      <Slider
+                        value={[applicant.plannedRetirementAge]}
+                        onValueChange={([value]) => 
+                          onApplicantChange(index, { plannedRetirementAge: value })
+                        }
+                        min={Math.max(50, currentAge)}
+                        max={85}
+                        step={1}
+                        className="w-full"
+                      />
+                      <p className="text-xs text-muted-foreground text-center">
+                        {yearsToRetirement > 0 
+                          ? `${yearsToRetirement} years until retirement`
+                          : "Already retired"
+                        }
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        Retirement
+                      </span>
+                      <span className="font-medium text-foreground">
+                        Age {applicant.plannedRetirementAge}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <PoundSterling className="h-3 w-3" />
+                      Current Income
+                    </span>
+                    <span className="font-medium text-foreground">
+                      {formatCurrency(applicant.annualIncome)}/yr
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">State Pension</span>
+                    <span className="text-foreground">{formatCurrency(applicant.statePension)}/yr</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Other Pension</span>
+                    <span className="text-foreground">{formatCurrency(applicant.otherPension)}/yr</span>
+                  </div>
+
+                  {/* Retirement Income Summary */}
+                  <div className="pt-2 mt-2 border-t border-border">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground text-xs">Retirement Income</span>
+                      <span className="font-semibold text-foreground">
+                        {formatCurrency(applicant.statePension + applicant.otherPension)}/yr
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    <Briefcase className="h-3 w-3" />
-                    Status
-                  </span>
-                  <Badge variant={applicant.employmentStatus === "working" ? "default" : "secondary"}>
-                    {applicant.employmentStatus === "working" ? "Working" : "Retired"}
-                  </Badge>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    Retirement
-                  </span>
-                  <span className="font-medium text-foreground">Age {applicant.plannedRetirementAge}</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    <PoundSterling className="h-3 w-3" />
-                    Income
-                  </span>
-                  <span className="font-medium text-foreground">
-                    {formatCurrency(applicant.annualIncome)}/yr
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">State Pension</span>
-                  <span className="text-foreground">{formatCurrency(applicant.statePension)}/yr</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Other Pension</span>
-                  <span className="text-foreground">{formatCurrency(applicant.otherPension)}/yr</span>
-                </div>
-              </div>
-            </div>
-          ))}
+            )
+          })}
 
           {/* Property */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
                 <Home className="h-4 w-4 text-accent" />
               </div>
               <div>
-                <p className="font-medium text-foreground">Property</p>
-                <p className="text-xs text-muted-foreground">Current Details</p>
+                <p className="font-medium text-foreground">Property & Loan</p>
+                <p className="text-xs text-muted-foreground">Adjust loan amount</p>
               </div>
             </div>
 
-            <div className="space-y-2 text-sm">
+            <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Property Value</span>
                 <span className="font-semibold text-foreground text-base">
@@ -115,12 +167,40 @@ export function ApplicantSummary({
                 </span>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Loan Amount</span>
-                <span className="font-semibold text-foreground text-base">
-                  {formatCurrency(property.loanAmount)}
-                </span>
-              </div>
+              {/* Editable Loan Amount */}
+              {isEditable ? (
+                <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">
+                      Loan Amount
+                    </Label>
+                    <span className="text-sm font-semibold text-primary">
+                      {formatCurrency(property.loanAmount)}
+                    </span>
+                  </div>
+                  <Slider
+                    value={[property.loanAmount]}
+                    onValueChange={([value]) => 
+                      onPropertyChange({ loanAmount: value })
+                    }
+                    min={25000}
+                    max={Math.min(property.propertyValue * 0.6, 500000)}
+                    step={5000}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>£25k</span>
+                    <span>{formatCurrency(Math.min(property.propertyValue * 0.6, 500000))}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Loan Amount</span>
+                  <span className="font-semibold text-foreground text-base">
+                    {formatCurrency(property.loanAmount)}
+                  </span>
+                </div>
+              )}
 
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Current Equity</span>
@@ -134,6 +214,23 @@ export function ApplicantSummary({
                 <Badge variant="outline">
                   {((property.loanAmount / property.propertyValue) * 100).toFixed(1)}%
                 </Badge>
+              </div>
+
+              {/* Combined Household Income */}
+              <div className="pt-3 mt-3 border-t border-border space-y-2">
+                <p className="text-xs text-muted-foreground font-medium">Combined Household</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-xs">Working Income</span>
+                  <span className="font-medium text-foreground">
+                    {formatCurrency(applicants.reduce((sum, a) => sum + a.annualIncome, 0))}/yr
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-xs">Retirement Income</span>
+                  <span className="font-medium text-foreground">
+                    {formatCurrency(applicants.reduce((sum, a) => sum + a.statePension + a.otherPension, 0))}/yr
+                  </span>
+                </div>
               </div>
             </div>
           </div>

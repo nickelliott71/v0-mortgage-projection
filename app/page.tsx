@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { SummaryCards } from "@/components/mortgage/summary-cards"
 import { ProjectionChart } from "@/components/mortgage/projection-chart"
 import { ComparisonTable } from "@/components/mortgage/comparison-table"
@@ -11,13 +11,13 @@ import {
   type ApplicantData,
   type PropertyData,
   type MortgageType,
-  generateProjections,
+  generateHouseholdProjections,
   calculateAge,
 } from "@/lib/mortgage-calculations"
 import { Building2, TrendingUp, FileText } from "lucide-react"
 
-// Sample data from the form (matching the provided screenshot)
-const sampleApplicants: ApplicantData[] = [
+// Initial data from the form (matching the provided screenshot)
+const initialApplicants: ApplicantData[] = [
   {
     dateOfBirth: { day: 7, month: 6, year: 1961 },
     gender: "female",
@@ -38,23 +38,49 @@ const sampleApplicants: ApplicantData[] = [
   },
 ]
 
-const sampleProperty: PropertyData = {
+const initialProperty: PropertyData = {
   propertyValue: 500000,
   loanAmount: 100000,
 }
 
 export default function MortgageProjectionPage() {
   const [selectedYear, setSelectedYear] = useState(10)
+  const [applicants, setApplicants] = useState<ApplicantData[]>(initialApplicants)
+  const [property, setProperty] = useState<PropertyData>(initialProperty)
   const maxYears = 40
 
-  // Use primary applicant for projections
-  const primaryApplicant = sampleApplicants[0]
-  const currentAge = calculateAge(primaryApplicant.dateOfBirth)
+  // Handle applicant updates
+  const handleApplicantChange = useCallback((index: number, updates: Partial<ApplicantData>) => {
+    setApplicants(prev => {
+      const newApplicants = [...prev]
+      newApplicants[index] = { ...newApplicants[index], ...updates }
+      return newApplicants
+    })
+  }, [])
 
-  // Generate projections for all mortgage types
+  // Handle property updates
+  const handlePropertyChange = useCallback((updates: Partial<PropertyData>) => {
+    setProperty(prev => ({ ...prev, ...updates }))
+  }, [])
+
+  // Use youngest applicant for age display (most conservative)
+  const youngestApplicant = useMemo(() => {
+    return applicants.reduce((youngest, current) => {
+      return calculateAge(current.dateOfBirth) < calculateAge(youngest.dateOfBirth) ? current : youngest
+    }, applicants[0])
+  }, [applicants])
+  
+  const currentAge = calculateAge(youngestApplicant.dateOfBirth)
+
+  // Find earliest retirement age among all applicants
+  const earliestRetirementAge = useMemo(() => {
+    return Math.min(...applicants.map(a => a.plannedRetirementAge))
+  }, [applicants])
+
+  // Generate projections for all mortgage types using combined household income
   const projections = useMemo(() => {
     const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
-    const result: Record<MortgageType, ReturnType<typeof generateProjections>> = {
+    const result: Record<MortgageType, ReturnType<typeof generateHouseholdProjections>> = {
       retirement: [],
       rio: [],
       lifetime: [],
@@ -62,11 +88,11 @@ export default function MortgageProjectionPage() {
     }
 
     mortgageTypes.forEach((type) => {
-      result[type] = generateProjections(primaryApplicant, sampleProperty, type, maxYears)
+      result[type] = generateHouseholdProjections(applicants, property, type, maxYears)
     })
 
     return result
-  }, [primaryApplicant])
+  }, [applicants, property])
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,8 +124,13 @@ export default function MortgageProjectionPage() {
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
-        {/* Applicant Summary */}
-        <ApplicantSummary applicants={sampleApplicants} property={sampleProperty} />
+        {/* Applicant Summary with Editable Controls */}
+        <ApplicantSummary 
+          applicants={applicants} 
+          property={property}
+          onApplicantChange={handleApplicantChange}
+          onPropertyChange={handlePropertyChange}
+        />
 
         {/* Year Selector */}
         <YearSelector
@@ -128,8 +159,9 @@ export default function MortgageProjectionPage() {
             <IncomeProjection
               projections={projections}
               selectedYear={selectedYear}
-              retirementAge={primaryApplicant.plannedRetirementAge}
+              retirementAge={earliestRetirementAge}
               currentAge={currentAge}
+              applicants={applicants}
             />
           </div>
         </div>
@@ -141,7 +173,7 @@ export default function MortgageProjectionPage() {
         <footer className="text-center py-8 text-sm text-muted-foreground border-t border-border mt-8">
           <p>
             Projections are illustrative and based on assumed growth rates. Property values
-            assume 3% annual appreciation. Actual results may vary.
+            assume 3% annual appreciation. Income grows at 2.5% until retirement.
           </p>
           <p className="mt-2">
             For professional broker use only. Not financial advice.

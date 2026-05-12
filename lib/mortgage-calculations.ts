@@ -95,6 +95,7 @@ export function calculateAge(
   return currentYear - dob.year
 }
 
+// Generate projections for a single applicant
 export function generateProjections(
   applicant: ApplicantData,
   property: PropertyData,
@@ -180,6 +181,121 @@ export function generateProjections(
       loanBalance: Math.round(loanBalance),
       equity: Math.round(equity),
       income: Math.round(income),
+      monthlyPayment: Math.round(monthlyPayment),
+    })
+  }
+
+  return projections
+}
+
+// Generate projections for combined household (multiple applicants)
+export function generateHouseholdProjections(
+  applicants: ApplicantData[],
+  property: PropertyData,
+  mortgageType: MortgageType,
+  years: number = 40
+): ProjectionData[] {
+  const config = MORTGAGE_CONFIGS[mortgageType]
+  // Use youngest applicant's age for display (more conservative for "years to retirement")
+  const primaryApplicant = applicants.reduce((youngest, current) => {
+    return calculateAge(current.dateOfBirth) < calculateAge(youngest.dateOfBirth) ? current : youngest
+  }, applicants[0])
+  
+  const startAge = calculateAge(primaryApplicant.dateOfBirth)
+  const propertyGrowthRate = 0.03 // 3% annual property appreciation
+  const inflationRate = 0.025 // 2.5% income growth
+
+  const projections: ProjectionData[] = []
+
+  let loanBalance = property.loanAmount
+  let propertyValue = property.propertyValue
+
+  // Calculate home reversion share sold
+  const sharePercentSold = mortgageType === "homeReversion" 
+    ? (property.loanAmount / property.propertyValue) * 1.5
+    : 0
+
+  for (let year = 0; year <= years; year++) {
+    // Calculate combined household income for this year
+    let totalIncome = 0
+    
+    for (const applicant of applicants) {
+      const applicantAge = calculateAge(applicant.dateOfBirth) + year
+      const isRetired = applicantAge >= applicant.plannedRetirementAge
+      
+      if (isRetired) {
+        // Pension income (doesn't grow with inflation for simplicity)
+        totalIncome += applicant.statePension + applicant.otherPension
+      } else {
+        // Working income grows with inflation
+        totalIncome += applicant.annualIncome * Math.pow(1 + inflationRate, year)
+      }
+    }
+
+    const age = startAge + year
+
+    // Property value grows
+    propertyValue = property.propertyValue * Math.pow(1 + propertyGrowthRate, year)
+
+    // Calculate monthly payment and loan balance based on mortgage type
+    let monthlyPayment = 0
+
+    switch (mortgageType) {
+      case "retirement":
+        // Capital and interest payments reduce balance over a 25-year term
+        const termYears = 25
+        const monthlyRate = config.interestRate / 12
+        const numPayments = termYears * 12
+        // Standard amortization formula
+        monthlyPayment = (property.loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
+                         (Math.pow(1 + monthlyRate, numPayments) - 1)
+        if (year > 0 && year <= termYears) {
+          // Simplified: balance reduces linearly over term
+          loanBalance = property.loanAmount * (1 - year / termYears)
+        } else if (year > termYears) {
+          loanBalance = 0
+          monthlyPayment = 0
+        }
+        break
+
+      case "rio":
+        // Interest-only payments, balance stays same
+        monthlyPayment = (property.loanAmount * config.interestRate) / 12
+        loanBalance = property.loanAmount // Balance stays constant
+        break
+
+      case "lifetime":
+        // Interest rolls up, no required payments
+        monthlyPayment = 0
+        if (year === 0) {
+          loanBalance = property.loanAmount
+        } else {
+          loanBalance = property.loanAmount * Math.pow(1 + config.interestRate, year)
+        }
+        break
+
+      case "homeReversion":
+        // No loan, just reduced equity ownership
+        monthlyPayment = 0
+        loanBalance = 0
+        break
+    }
+
+    // Calculate equity
+    let equity: number
+    if (mortgageType === "homeReversion") {
+      equity = propertyValue * (1 - sharePercentSold)
+    } else {
+      equity = Math.max(0, propertyValue - loanBalance)
+    }
+
+    projections.push({
+      year,
+      age,
+      propertyValue: Math.round(propertyValue),
+      loanBalance: Math.round(loanBalance),
+      equity: Math.round(equity),
+      income: Math.round(totalIncome),
       monthlyPayment: Math.round(monthlyPayment),
     })
   }
