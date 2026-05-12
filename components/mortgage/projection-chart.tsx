@@ -137,15 +137,15 @@ export function ProjectionChart({
             <div className="relative">
               {/* Retirement labels positioned above chart */}
               {retirementLabels.length > 0 && (
-                <div className="relative h-12 ml-[60px] mr-[20px]">
+                <div className="relative h-10 ml-[60px] mr-[20px]">
                   {retirementLabels.map((label, index) => (
                     <div 
                       key={index} 
                       className="absolute text-center -translate-x-1/2"
                       style={{ left: `${(label.years / 40) * 100}%` }}
                     >
-                      <p className="text-sm font-medium text-foreground">{label.title}</p>
-                      <p className="text-sm text-muted-foreground">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
+                      <p className="text-xs font-medium text-red-600">{label.title}</p>
+                      <p className="text-xs text-red-500">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
                     </div>
                   ))}
                 </div>
@@ -232,15 +232,15 @@ export function ProjectionChart({
             <div className="relative">
               {/* Retirement labels positioned above chart */}
               {retirementLabels.length > 0 && (
-                <div className="relative h-12 ml-[60px] mr-[20px]">
+                <div className="relative h-10 ml-[60px] mr-[20px]">
                   {retirementLabels.map((label, index) => (
                     <div 
                       key={index} 
                       className="absolute text-center -translate-x-1/2"
                       style={{ left: `${(label.years / 40) * 100}%` }}
                     >
-                      <p className="text-sm font-medium text-foreground">{label.title}</p>
-                      <p className="text-sm text-muted-foreground">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
+                      <p className="text-xs font-medium text-red-600">{label.title}</p>
+                      <p className="text-xs text-red-500">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
                     </div>
                   ))}
                 </div>
@@ -305,15 +305,15 @@ export function ProjectionChart({
             <div className="relative">
               {/* Retirement labels positioned above chart */}
               {retirementLabels.length > 0 && (
-                <div className="relative h-12 ml-[60px] mr-[20px]">
+                <div className="relative h-10 ml-[60px] mr-[20px]">
                   {retirementLabels.map((label, index) => (
                     <div 
                       key={index} 
                       className="absolute text-center -translate-x-1/2"
                       style={{ left: `${(label.years / 40) * 100}%` }}
                     >
-                      <p className="text-sm font-medium text-foreground">{label.title}</p>
-                      <p className="text-sm text-muted-foreground">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
+                      <p className="text-xs font-medium text-red-600">{label.title}</p>
+                      <p className="text-xs text-red-500">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
                     </div>
                   ))}
                 </div>

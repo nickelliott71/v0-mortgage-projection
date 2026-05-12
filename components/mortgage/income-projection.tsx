@@ -68,21 +68,26 @@ export function IncomeProjection({
     const yearsToRetirement = applicant.plannedRetirementAge - applicantAge
     return {
       year: yearsToRetirement,
-      label: `Applicant ${index + 1} Retires`,
+      applicantIndex: index + 1,
       age: applicant.plannedRetirementAge,
     }
   }).filter(marker => marker.year > 0 && marker.year <= 40)
+    .sort((a, b) => a.year - b.year)
 
-  // Deduplicate markers at same year
-  const uniqueMarkers = retirementMarkers.reduce((acc, marker) => {
-    const existing = acc.find(m => m.year === marker.year)
-    if (existing) {
-      existing.label = "Both Retire"
-    } else {
-      acc.push(marker)
+  // Create display labels for above chart
+  const retirementLabels: { title: string; years: number }[] = []
+  
+  if (retirementMarkers.length === 2 && retirementMarkers[0].year === retirementMarkers[1].year) {
+    retirementLabels.push({ title: "Both retired", years: retirementMarkers[0].year })
+  } else if (retirementMarkers.length >= 1) {
+    retirementLabels.push({ title: "First retirement", years: retirementMarkers[0].year })
+    if (retirementMarkers.length === 2) {
+      retirementLabels.push({ title: "Both retired", years: retirementMarkers[1].year })
     }
-    return acc
-  }, [] as typeof retirementMarkers)
+  }
+
+  // Unique years for reference lines (no labels on chart)
+  const uniqueRetirementYears = [...new Set(retirementMarkers.map(m => m.year))]
 
   const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string; dataKey: string }>; label?: string }) => {
     if (active && payload && payload.length) {
@@ -146,6 +151,22 @@ export function IncomeProjection({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="relative">
+          {/* Retirement labels positioned above chart */}
+          {retirementLabels.length > 0 && (
+            <div className="relative h-10 ml-[60px] mr-[20px]">
+              {retirementLabels.map((label, index) => (
+                <div 
+                  key={index} 
+                  className="absolute text-center -translate-x-1/2"
+                  style={{ left: `${(label.years / 40) * 100}%` }}
+                >
+                  <p className="text-xs font-medium text-red-600">{label.title}</p>
+                  <p className="text-xs text-red-500">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
+                </div>
+              ))}
+            </div>
+          )}
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={combinedData}>
@@ -175,21 +196,14 @@ export function IncomeProjection({
                 formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
               />
               
-              {/* Retirement reference lines for each applicant */}
-              {uniqueMarkers.map((marker, index) => (
+              {/* Retirement reference lines */}
+              {uniqueRetirementYears.map((year, index) => (
                 <ReferenceLine
                   key={index}
-                  x={marker.year}
+                  x={year}
                   stroke="#dc2626"
                   strokeDasharray="5 5"
                   strokeWidth={2}
-                  label={{
-                    value: marker.label,
-                    position: "top",
-                    fill: "#dc2626",
-                    fontSize: 10,
-                    fontWeight: 500,
-                  }}
                 />
               ))}
 
@@ -224,6 +238,7 @@ export function IncomeProjection({
               ))}
             </ComposedChart>
           </ResponsiveContainer>
+        </div>
         </div>
 
         {/* Summary stats */}
