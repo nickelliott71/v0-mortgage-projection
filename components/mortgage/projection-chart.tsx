@@ -127,18 +127,6 @@ export function ProjectionChart({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="equity" className="space-y-4">
-          {/* Retirement labels above chart */}
-          {retirementLabels.length > 0 && (
-            <div className="flex items-center gap-8 pb-2">
-              {retirementLabels.map((label, index) => (
-                <div key={index} className="text-center">
-                  <p className="text-sm font-medium text-foreground">{label.title}</p>
-                  <p className="text-sm text-muted-foreground">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
           <TabsList className="grid w-full max-w-md grid-cols-3">
             <TabsTrigger value="equity">Equity</TabsTrigger>
             <TabsTrigger value="balance">Loan Balance</TabsTrigger>
@@ -146,6 +134,22 @@ export function ProjectionChart({
           </TabsList>
 
           <TabsContent value="equity" className="space-y-4">
+            <div className="relative">
+              {/* Retirement labels positioned above chart */}
+              {retirementLabels.length > 0 && (
+                <div className="relative h-12 ml-[60px] mr-[20px]">
+                  {retirementLabels.map((label, index) => (
+                    <div 
+                      key={index} 
+                      className="absolute text-center -translate-x-1/2"
+                      style={{ left: `${(label.years / 40) * 100}%` }}
+                    >
+                      <p className="text-sm font-medium text-foreground">{label.title}</p>
+                      <p className="text-sm text-muted-foreground">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={combinedData} onClick={handleChartClick}>
@@ -221,9 +225,26 @@ export function ProjectionChart({
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="balance" className="space-y-4">
+            <div className="relative">
+              {/* Retirement labels positioned above chart */}
+              {retirementLabels.length > 0 && (
+                <div className="relative h-12 ml-[60px] mr-[20px]">
+                  {retirementLabels.map((label, index) => (
+                    <div 
+                      key={index} 
+                      className="absolute text-center -translate-x-1/2"
+                      style={{ left: `${(label.years / 40) * 100}%` }}
+                    >
+                      <p className="text-sm font-medium text-foreground">{label.title}</p>
+                      <p className="text-sm text-muted-foreground">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={combinedData} onClick={handleChartClick}>
@@ -277,9 +298,26 @@ export function ProjectionChart({
                 </LineChart>
               </ResponsiveContainer>
             </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="property" className="space-y-4">
+            <div className="relative">
+              {/* Retirement labels positioned above chart */}
+              {retirementLabels.length > 0 && (
+                <div className="relative h-12 ml-[60px] mr-[20px]">
+                  {retirementLabels.map((label, index) => (
+                    <div 
+                      key={index} 
+                      className="absolute text-center -translate-x-1/2"
+                      style={{ left: `${(label.years / 40) * 100}%` }}
+                    >
+                      <p className="text-sm font-medium text-foreground">{label.title}</p>
+                      <p className="text-sm text-muted-foreground">In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={combinedData} onClick={handleChartClick}>
@@ -334,6 +372,7 @@ export function ProjectionChart({
                   />
                 </AreaChart>
               </ResponsiveContainer>
+            </div>
             </div>
           </TabsContent>
         </Tabs>
