@@ -30,7 +30,7 @@ export function ApplicantSummary({
 
   return (
     <Card>
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-2">
         <CardTitle className="text-lg">Application Summary</CardTitle>
       </CardHeader>
       <CardContent>
@@ -207,23 +207,6 @@ export function ApplicantSummary({
                 <Badge variant="outline">
                   {((property.loanAmount / property.propertyValue) * 100).toFixed(1)}%
                 </Badge>
-              </div>
-
-              {/* Combined Household Income */}
-              <div className="pt-3 mt-3 border-t border-border space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">Combined Household</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground text-xs">Working Income</span>
-                  <span className="font-medium text-foreground">
-                    {formatCurrency(applicants.reduce((sum, a) => sum + a.annualIncome, 0))}/yr
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground text-xs">Retirement Income</span>
-                  <span className="font-medium text-foreground">
-                    {formatCurrency(applicants.reduce((sum, a) => sum + a.statePension + a.otherPension, 0))}/yr
-                  </span>
-                </div>
               </div>
             </div>
           </div>
