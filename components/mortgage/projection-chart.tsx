@@ -111,19 +111,23 @@ export function ProjectionChart({
   // Get scaled x-axis ticks
   const scaledTicks = getScaledXAxisTicks()
 
+  // Calculate current ages for each applicant
+  const applicantCurrentAges = applicants.map(a => calculateAge(a.dateOfBirth))
+
   // Combine data for multi-line chart with scaled x position
   const combinedData = projections.retirement.map((_, index) => {
     const year = projections.retirement[index].year
-    const dataPoint: Record<string, number> = {
+    const dataPoint: Record<string, number | number[]> = {
       year: year,
       scaledX: yearToScaledPosition(year),
       age: projections.retirement[index].age,
       propertyValue: projections.retirement[index].propertyValue,
+      applicantAges: applicantCurrentAges.map(currentAge => currentAge + year),
     }
 
     mortgageTypes.forEach((type) => {
-      dataPoint[`${type}Equity`] = projections[type][index].equity
-      dataPoint[`${type}Balance`] = projections[type][index].loanBalance
+      dataPoint[`${type}Equity`] = projections[type][index].equity as number
+      dataPoint[`${type}Balance`] = projections[type][index].loanBalance as number
     })
 
     return dataPoint
@@ -164,12 +168,21 @@ export function ProjectionChart({
     }
   }
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string; dataKey: string; payload: { year: number } }> }) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string; dataKey: string; payload: { year: number; applicantAges?: number[] } }> }) => {
     if (active && payload && payload.length) {
       const year = payload[0]?.payload?.year
+      const applicantAges = payload[0]?.payload?.applicantAges || []
+      
+      // Format ages display
+      const agesDisplay = applicantAges.length > 0 
+        ? applicantAges.length === 1 
+          ? `Age ${applicantAges[0]}`
+          : `Ages ${applicantAges[0]} & ${applicantAges[1]}`
+        : ''
+      
       return (
         <div className="bg-card border border-border rounded-lg shadow-lg p-3">
-          <p className="font-medium text-foreground mb-2">Year {year}</p>
+          <p className="font-medium text-foreground mb-2">Year {year} {agesDisplay && `(${agesDisplay})`}</p>
           {payload.map((entry, index) => {
             // Find the mortgage type from the dataKey
             const typeMatch = entry.dataKey?.match(/^(retirement|rio|lifetime|homeReversion)/)
