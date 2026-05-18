@@ -39,13 +39,12 @@ export interface MortgageConfig {
   loanGrowth: "decreases" | "stable" | "increases" | "fixed"
 }
 
-// Accessible color palette - WCAG AA compliant with sufficient contrast
-// Colors chosen to be distinguishable for colorblind users (deuteranopia, protanopia, tritanopia)
+// Brand color palette for mortgage types
 export const CHART_COLORS = {
-  retirement: "#1e40af", // Deep blue
-  rio: "#0d9488", // Teal
-  lifetime: "#c2410c", // Burnt orange
-  homeReversion: "#7c3aed", // Purple
+  retirement: "#AD092A", // Deep red
+  rio: "#003894", // Navy blue
+  lifetime: "#C86426", // Burnt orange
+  homeReversion: "#014A39", // Dark teal
   property: "#059669", // Emerald green
 } as const
 
