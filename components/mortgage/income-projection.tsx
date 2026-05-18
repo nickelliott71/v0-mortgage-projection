@@ -212,8 +212,8 @@ export function IncomeProjection({
                   className="absolute text-center -translate-x-1/2"
                   style={{ left: `${yearToScaledPosition(label.years)}%` }}
                 >
-                  <p className="text-xs font-medium" style={{ color: '#dc2626' }}>{label.title}</p>
-                  <p className="text-xs" style={{ color: '#dc2626', opacity: 0.8 }}>In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
+                  <p className="text-xs font-medium" style={{ color: '#C50B30' }}>{label.title}</p>
+                  <p className="text-xs" style={{ color: '#C50B30', opacity: 0.8 }}>In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
                 </div>
               ))}
             </div>
@@ -258,7 +258,7 @@ export function IncomeProjection({
                 <ReferenceLine
                   key={index}
                   x={yearToScaledPosition(year)}
-                  stroke="#dc2626"
+                  stroke="#C50B30"
                   strokeDasharray="5 5"
                   strokeWidth={2}
                 />
