@@ -15,6 +15,7 @@ import {
   getScaledXAxisTicks,
 } from "@/lib/mortgage-calculations"
 import {
+  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -34,7 +35,7 @@ interface ProjectionChartProps {
   applicants?: ApplicantData[]
 }
 
-type ChartView = "equity" | "loanVsProperty"
+type ChartView = "equity" | "balance" | "property"
 
 // Custom dot component for accessibility - renders different shapes for each mortgage type
 const CustomDot = ({ cx, cy, payload, dataKey, mortgageType }: { 
@@ -221,9 +222,10 @@ export function ProjectionChart({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="equity" className="space-y-4">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-md grid-cols-3">
             <TabsTrigger value="equity">Equity</TabsTrigger>
-            <TabsTrigger value="loanVsProperty">Loan vs property</TabsTrigger>
+            <TabsTrigger value="balance">Loan balance</TabsTrigger>
+            <TabsTrigger value="property">Property value</TabsTrigger>
           </TabsList>
 
           <TabsContent value="equity" className="space-y-4">
@@ -339,7 +341,96 @@ export function ProjectionChart({
             </div>
           </TabsContent>
 
-          <TabsContent value="loanVsProperty" className="space-y-4">
+          <TabsContent value="balance" className="space-y-4">
+            <div className="relative">
+              {/* Retirement labels positioned above chart */}
+              {retirementLabels.length > 0 && (
+                <div className="relative h-10" style={{ marginLeft: 60, marginRight: 20 }}>
+                  {retirementLabels.map((label, index) => (
+                    <div 
+                      key={index} 
+                      className="absolute text-center -translate-x-1/2"
+                      style={{ left: `${yearToScaledPosition(label.years)}%` }}
+                    >
+                      <p className="text-xs font-medium" style={{ color: '#C50B30' }}>{label.title}</p>
+                      <p className="text-xs" style={{ color: '#C50B30', opacity: 0.8 }}>In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            <div className="h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={combinedData} onClick={handleChartClick} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis
+                    dataKey="scaledX"
+                    type="number"
+                    domain={[0, 100]}
+                    ticks={scaledTicks.map(t => t.value)}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
+                    tickFormatter={(value) => {
+                      const tick = scaledTicks.find(t => Math.abs(t.value - value) < 0.1)
+                      return tick?.label || ''
+                    }}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
+                    tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: "20px" }}
+                    formatter={(value, entry) => {
+                      const typeMatch = entry.dataKey?.match(/^(retirement|rio|lifetime|homeReversion)/)
+                      const mortgageType = typeMatch ? typeMatch[1] as MortgageType : null
+                      return (
+                        <span className="inline-flex items-center gap-1.5" style={{ color: "#374151" }}>
+                          {mortgageType && renderShapeIndicator(mortgageType, entry.color || '#000')}
+                          {value}
+                        </span>
+                      )
+                    }}
+                  />
+                  {/* Retirement reference lines */}
+                  {uniqueRetirementYears.map((year, index) => (
+                    <ReferenceLine
+                      key={`retirement-${index}`}
+                      x={yearToScaledPosition(year)}
+                      stroke="#C50B30"
+                      strokeDasharray="5 5"
+                      strokeWidth={2}
+                    />
+                  ))}
+                  <ReferenceLine
+                    x={yearToScaledPosition(selectedYear)}
+                    stroke="#1e40af"
+                    strokeDasharray="5 5"
+                    strokeWidth={2}
+                  />
+                  {mortgageTypes.map((type) => (
+                    <Line
+                      key={type}
+                      type="monotone"
+                      dataKey={`${type}Balance`}
+                      name={MORTGAGE_CONFIGS[type].shortName}
+                      stroke={MORTGAGE_CONFIGS[type].color}
+                      strokeWidth={3}
+                      strokeDasharray={ACCESSIBILITY_PATTERNS[type].strokeDasharray}
+                      dot={(props) => <CustomDot {...props} mortgageType={type} />}
+                      activeDot={{ r: 6, strokeWidth: 2, fill: "#fff" }}
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="property" className="space-y-4">
             <div className="relative">
               {/* Retirement labels positioned above chart */}
               {retirementLabels.length > 0 && (
@@ -360,8 +451,8 @@ export function ProjectionChart({
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={combinedData} onClick={handleChartClick} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <defs>
-                    <linearGradient id="propertyGradientCombined" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={CHART_COLORS.property} stopOpacity={0.3} />
+                    <linearGradient id="propertyGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={CHART_COLORS.property} stopOpacity={0.4} />
                       <stop offset="95%" stopColor={CHART_COLORS.property} stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
@@ -415,29 +506,14 @@ export function ProjectionChart({
                     strokeDasharray="5 5"
                     strokeWidth={2}
                   />
-                  {/* Property value as filled area - rendered first so it's behind the lines */}
                   <Area
                     type="monotone"
                     dataKey="propertyValue"
                     name="Property value"
                     stroke={CHART_COLORS.property}
-                    fill="url(#propertyGradientCombined)"
+                    fill="url(#propertyGradient)"
                     strokeWidth={3}
                   />
-                  {/* Loan balances as lines overlaid on property value */}
-                  {mortgageTypes.map((type) => (
-                    <Line
-                      key={type}
-                      type="monotone"
-                      dataKey={`${type}Balance`}
-                      name={`${MORTGAGE_CONFIGS[type].shortName} loan`}
-                      stroke={MORTGAGE_CONFIGS[type].color}
-                      strokeWidth={3}
-                      strokeDasharray={ACCESSIBILITY_PATTERNS[type].strokeDasharray}
-                      dot={(props) => <CustomDot {...props} mortgageType={type} />}
-                      activeDot={{ r: 6, strokeWidth: 2, fill: "#fff" }}
-                    />
-                  ))}
                 </AreaChart>
               </ResponsiveContainer>
             </div>
