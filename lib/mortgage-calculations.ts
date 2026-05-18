@@ -41,10 +41,10 @@ export interface MortgageConfig {
 
 // Brand color palette for mortgage types
 export const CHART_COLORS = {
-  retirement: "#AD092A", // Deep red
-  rio: "#003894", // Navy blue
+  retirement: "#C50B30", // Deep red
+  rio: "#005DBA", // Navy blue
   lifetime: "#C86426", // Burnt orange
-  homeReversion: "#014A39", // Dark teal
+  homeReversion: "#00633D", // Dark teal
   property: "#059669", // Emerald green
 } as const
 
