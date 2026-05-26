@@ -43,6 +43,8 @@ export function IncomeProjection({
   applicants = [],
 }: IncomeProjectionProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
+  // Chart excludes homeReversion as it has age eligibility requirements
+  const chartMortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime"]
 
   // Helper to render shape indicator for accessibility
   const renderShapeIndicator = (type: MortgageType, color: string, size: number = 12) => {
@@ -164,7 +166,7 @@ export function IncomeProjection({
           )}
           <p className="text-xs text-muted-foreground mb-1">Annual mortgage payments:</p>
           {payload
-            .filter((p) => p.dataKey.includes("Payment"))
+            .filter((p) => p.dataKey.includes("Payment") && !p.dataKey.includes("homeReversion"))
             .map((entry, index) => {
               const typeName = entry.dataKey.replace("Payment", "") as MortgageType
               const config = MORTGAGE_CONFIGS[typeName]
@@ -283,7 +285,7 @@ export function IncomeProjection({
               />
 
               {/* Payment bars for each mortgage type */}
-              {mortgageTypes.map((type) => (
+              {chartMortgageTypes.map((type) => (
                 <Bar
                   key={type}
                   dataKey={`${type}Payment`}
@@ -299,8 +301,8 @@ export function IncomeProjection({
         </div>
 
         {/* Summary stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-4 border-t border-border">
-          {mortgageTypes.map((type) => {
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-border">
+          {chartMortgageTypes.map((type) => {
             const data = projections[type][selectedYear]
             const annualPayment = data.monthlyPayment * 12
             const paymentRatio =
