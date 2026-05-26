@@ -77,6 +77,8 @@ export function ProjectionChart({
   applicants = [],
 }: ProjectionChartProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
+  // Equity chart excludes homeReversion as it has age eligibility requirements
+  const equityMortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime"]
 
   // Calculate retirement years for each applicant
   const retirementMarkers = applicants.map((applicant, index) => {
@@ -249,7 +251,7 @@ export function ProjectionChart({
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={combinedData} onClick={handleChartClick} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <defs>
-                    {mortgageTypes.map((type) => (
+                    {equityMortgageTypes.map((type) => (
                       <linearGradient
                         key={type}
                         id={`gradient-${type}`}
@@ -321,7 +323,7 @@ export function ProjectionChart({
                     strokeDasharray="5 5"
                     strokeWidth={2}
                   />
-                  {mortgageTypes.map((type) => (
+                  {equityMortgageTypes.map((type) => (
                     <Area
                       key={type}
                       type="monotone"
