@@ -220,7 +220,8 @@ export function generateHouseholdProjections(
   applicants: ApplicantData[],
   property: PropertyData,
   mortgageType: MortgageType,
-  years: number = 40
+  years: number = 40,
+  optionalLifetimePayment: number = 0
 ): ProjectionData[] {
   const config = MORTGAGE_CONFIGS[mortgageType]
   // Use youngest applicant's age for display (more conservative for "years to retirement")
@@ -292,12 +293,18 @@ export function generateHouseholdProjections(
         break
 
       case "lifetime":
-        // Interest rolls up, no required payments
-        monthlyPayment = 0
+        // Interest rolls up, but optional payments can reduce what's added
+        monthlyPayment = optionalLifetimePayment
         if (year === 0) {
           loanBalance = property.loanAmount
         } else {
-          loanBalance = property.loanAmount * Math.pow(1 + config.interestRate, year)
+          // Calculate interest for the year
+          const annualInterest = loanBalance * config.interestRate
+          // Subtract annual optional payments from interest
+          const annualPayments = optionalLifetimePayment * 12
+          // If payments cover interest, balance stays same; if not, remaining interest rolls up
+          const netInterestAdded = Math.max(0, annualInterest - annualPayments)
+          loanBalance = loanBalance + netInterestAdded
         }
         break
 

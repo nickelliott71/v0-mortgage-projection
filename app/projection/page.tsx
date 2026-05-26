@@ -50,6 +50,7 @@ export default function MortgageProjectionPage() {
   const [selectedYear, setSelectedYear] = useState(10)
   const [applicants, setApplicants] = useState<ApplicantData[]>(fallbackApplicants)
   const [property, setProperty] = useState<PropertyData>(fallbackProperty)
+  const [lifetimeOptionalPayment, setLifetimeOptionalPayment] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
   const maxYears = 40
 
@@ -111,11 +112,12 @@ export default function MortgageProjectionPage() {
     }
 
     mortgageTypes.forEach((type) => {
-      result[type] = generateHouseholdProjections(applicants, property, type, maxYears)
+      const optionalPayment = type === "lifetime" ? lifetimeOptionalPayment : 0
+      result[type] = generateHouseholdProjections(applicants, property, type, maxYears, optionalPayment)
     })
 
     return result
-  }, [applicants, property])
+  }, [applicants, property, lifetimeOptionalPayment])
 
   if (!isLoaded) {
     return (
@@ -170,7 +172,12 @@ export default function MortgageProjectionPage() {
         />
 
         {/* Summary Cards */}
-        <SummaryCards projections={projections} selectedYear={selectedYear} />
+        <SummaryCards 
+          projections={projections} 
+          selectedYear={selectedYear} 
+          lifetimeOptionalPayment={lifetimeOptionalPayment}
+          onLifetimePaymentChange={setLifetimeOptionalPayment}
+        />
 
         {/* Charts Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
