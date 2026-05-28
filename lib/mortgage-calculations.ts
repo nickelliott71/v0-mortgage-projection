@@ -78,8 +78,8 @@ export const ACCESSIBILITY_PATTERNS: Record<MortgageType, {
 
 export const MORTGAGE_CONFIGS: Record<MortgageType, MortgageConfig> = {
   retirement: {
-    name: "Retirement Mortgage",
-    shortName: "Retirement",
+    name: "Repayment Mortgage",
+    shortName: "Repayment",
     interestRate: 0.055,
     description: "Fixed term, interest-only or capital & interest payments",
     color: CHART_COLORS.retirement,
@@ -87,8 +87,8 @@ export const MORTGAGE_CONFIGS: Record<MortgageType, MortgageConfig> = {
     loanGrowth: "decreases",
   },
   rio: {
-    name: "Retirement Interest Only (RIO)",
-    shortName: "RIO",
+    name: "Interest Only (inc. RIO)",
+    shortName: "Interest only (inc. RIO)",
     interestRate: 0.052,
     description: "Interest-only payments required, for life",
     color: CHART_COLORS.rio,
