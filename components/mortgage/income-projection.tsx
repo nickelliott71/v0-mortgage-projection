@@ -268,7 +268,23 @@ export function IncomeProjection({
               <Tooltip content={<CustomTooltip />} />
               <Legend 
                 wrapperStyle={{ paddingTop: "20px" }}
-                formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
+                formatter={(value, entry) => {
+                  // Find the mortgage type from the dataKey
+                  const dataKey = entry.dataKey as string
+                  const typeMatch = dataKey?.match(/^(retirement|rio|lifetime|homeReversion)/)
+                  const type = typeMatch ? typeMatch[1] as MortgageType : null
+                  
+                  // Only show shape indicators for mortgage payment bars, not income area
+                  if (type && chartMortgageTypes.includes(type)) {
+                    return (
+                      <span className="inline-flex items-center gap-1.5" style={{ color: "#374151" }}>
+                        {renderShapeIndicator(type, mortgageConfigs[type].color, 10)}
+                        {value}
+                      </span>
+                    )
+                  }
+                  return <span style={{ color: "#374151" }}>{value}</span>
+                }}
               />
               
               {/* Retirement reference lines */}
