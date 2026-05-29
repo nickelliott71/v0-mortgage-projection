@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
   type MortgageType,
+  type MortgageConfig,
   type ApplicantData,
   MORTGAGE_CONFIGS,
   CHART_COLORS,
@@ -33,6 +34,7 @@ interface IncomeProjectionProps {
   retirementAge: number
   currentAge: number
   applicants?: ApplicantData[]
+  mortgageConfigs?: Record<MortgageType, MortgageConfig>
 }
 
 export function IncomeProjection({
@@ -41,6 +43,7 @@ export function IncomeProjection({
   retirementAge,
   currentAge,
   applicants = [],
+  mortgageConfigs = MORTGAGE_CONFIGS,
 }: IncomeProjectionProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
   // Chart excludes homeReversion as it has age eligibility requirements
@@ -169,7 +172,7 @@ export function IncomeProjection({
             .filter((p) => p.dataKey.includes("Payment") && !p.dataKey.includes("homeReversion"))
             .map((entry, index) => {
               const typeName = entry.dataKey.replace("Payment", "") as MortgageType
-              const config = MORTGAGE_CONFIGS[typeName]
+              const config = mortgageConfigs[typeName]
               const netIncome = yearData ? yearData[`${typeName}NetIncome`] : 0
               return (
                 <div key={index} className="flex items-center justify-between gap-4 text-sm py-0.5">
@@ -289,8 +292,8 @@ export function IncomeProjection({
                 <Bar
                   key={type}
                   dataKey={`${type}Payment`}
-                  name={`${MORTGAGE_CONFIGS[type].shortName}`}
-                  fill={MORTGAGE_CONFIGS[type].color}
+                  name={`${mortgageConfigs[type].shortName}`}
+                  fill={mortgageConfigs[type].color}
                   opacity={0.85}
                   barSize={10}
                 />
@@ -312,10 +315,10 @@ export function IncomeProjection({
             return (
               <div key={type} className="text-center p-3 rounded-lg bg-muted/30">
                 <div className="flex justify-center mb-2">
-                  {renderShapeIndicator(type, MORTGAGE_CONFIGS[type].color, 16)}
+                  {renderShapeIndicator(type, mortgageConfigs[type].color, 16)}
                 </div>
                 <p className="text-xs font-medium text-foreground">
-                  {MORTGAGE_CONFIGS[type].shortName}
+                  {mortgageConfigs[type].shortName}
                 </p>
                 <p className="text-lg font-bold text-foreground mt-1">
                   {paymentRatio}%

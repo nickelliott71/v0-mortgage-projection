@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import {
   type MortgageType,
+  type MortgageConfig,
   MORTGAGE_CONFIGS,
   type ProjectionData,
   formatCurrency,
@@ -26,13 +27,15 @@ interface SummaryCardsProps {
   selectedYear: number
   lifetimeOptionalPayment?: number
   onLifetimePaymentChange?: (payment: number) => void
+  mortgageConfigs?: Record<MortgageType, MortgageConfig>
 }
 
 export function SummaryCards({ 
   projections, 
   selectedYear, 
   lifetimeOptionalPayment = 0,
-  onLifetimePaymentChange 
+  onLifetimePaymentChange,
+  mortgageConfigs = MORTGAGE_CONFIGS
 }: SummaryCardsProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -53,7 +56,7 @@ export function SummaryCards({
     <>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {mortgageTypes.map((type) => {
-        const config = MORTGAGE_CONFIGS[type]
+        const config = mortgageConfigs[type]
         const data = projections[type][selectedYear]
         const startData = projections[type][0]
         const equityChange = data.equity - startData.equity

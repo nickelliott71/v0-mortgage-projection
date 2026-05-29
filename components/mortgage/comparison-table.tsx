@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import {
   type MortgageType,
+  type MortgageConfig,
   MORTGAGE_CONFIGS,
   ACCESSIBILITY_PATTERNS,
   type ProjectionData,
@@ -22,21 +23,22 @@ import { Check, X, Minus } from "lucide-react"
 interface ComparisonTableProps {
   projections: Record<MortgageType, ProjectionData[]>
   selectedYear: number
+  mortgageConfigs?: Record<MortgageType, MortgageConfig>
 }
 
 interface Feature {
   label: string
   key: string
-  getValue: (type: MortgageType, data: ProjectionData) => React.ReactNode
+  getValue: (type: MortgageType, data: ProjectionData, configs: Record<MortgageType, MortgageConfig>) => React.ReactNode
 }
 
-export function ComparisonTable({ projections, selectedYear }: ComparisonTableProps) {
+export function ComparisonTable({ projections, selectedYear, mortgageConfigs = MORTGAGE_CONFIGS }: ComparisonTableProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
 
   // Helper to render shape indicator for accessibility
   const renderShapeIndicator = (type: MortgageType, size: number = 12) => {
     const pattern = ACCESSIBILITY_PATTERNS[type]
-    const color = MORTGAGE_CONFIGS[type].color
+    const color = mortgageConfigs[type].color
     
     switch (pattern.markerShape) {
       case 'circle':
@@ -91,8 +93,8 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
     {
       label: "Monthly payments",
       key: "payments",
-      getValue: (type, data) => {
-        const config = MORTGAGE_CONFIGS[type]
+      getValue: (type, data, configs) => {
+        const config = configs[type]
         if (config.monthlyPaymentType === "none") {
           return (
             <span className="inline-flex items-center justify-center gap-1 text-green-600">
@@ -139,8 +141,8 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
     {
       label: "Loan balance trend",
       key: "trend",
-      getValue: (type) => {
-        const config = MORTGAGE_CONFIGS[type]
+      getValue: (type, data, configs) => {
+        const config = configs[type]
         const colors = {
           decreases: "bg-green-100 text-green-700",
           stable: "bg-blue-100 text-blue-700",
@@ -194,7 +196,7 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
                   <TableHead key={type} className="text-center min-w-[140px]">
                     <div className="flex flex-col items-center gap-1">
                       {renderShapeIndicator(type, 12)}
-                      <span>{MORTGAGE_CONFIGS[type].shortName}</span>
+                      <span>{mortgageConfigs[type].shortName}</span>
                     </div>
                   </TableHead>
                 ))}
@@ -208,7 +210,7 @@ export function ComparisonTable({ projections, selectedYear }: ComparisonTablePr
                   </TableCell>
                   {mortgageTypes.map((type) => (
                     <TableCell key={type} className="text-center">
-                      {feature.getValue(type, projections[type][selectedYear])}
+                      {feature.getValue(type, projections[type][selectedYear], mortgageConfigs)}
                     </TableCell>
                   ))}
                 </TableRow>

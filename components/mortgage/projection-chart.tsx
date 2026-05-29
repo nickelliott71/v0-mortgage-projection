@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   type MortgageType,
+  type MortgageConfig,
   type ApplicantData,
   MORTGAGE_CONFIGS,
   CHART_COLORS,
@@ -33,17 +34,19 @@ interface ProjectionChartProps {
   selectedYear: number
   onYearChange: (year: number) => void
   applicants?: ApplicantData[]
+  mortgageConfigs?: Record<MortgageType, MortgageConfig>
 }
 
 type ChartView = "equity" | "balance" | "property"
 
 // Custom dot component for accessibility - renders different shapes for each mortgage type
-const CustomDot = ({ cx, cy, payload, dataKey, mortgageType }: { 
+const CustomDot = ({ cx, cy, payload, dataKey, mortgageType, mortgageConfigs = MORTGAGE_CONFIGS }: { 
   cx?: number; 
   cy?: number; 
   payload?: { year: number }; 
   dataKey?: string;
   mortgageType: MortgageType;
+  mortgageConfigs?: Record<MortgageType, MortgageConfig>;
 }) => {
   if (cx === undefined || cy === undefined || !payload) return null
   
@@ -51,7 +54,7 @@ const CustomDot = ({ cx, cy, payload, dataKey, mortgageType }: {
   const pattern = ACCESSIBILITY_PATTERNS[mortgageType]
   if (payload.year % pattern.markerInterval !== 0) return null
   
-  const color = MORTGAGE_CONFIGS[mortgageType].color
+  const color = mortgageConfigs[mortgageType].color
   const size = 4
   
   switch (pattern.markerShape) {
@@ -75,6 +78,7 @@ export function ProjectionChart({
   selectedYear,
   onYearChange,
   applicants = [],
+  mortgageConfigs = MORTGAGE_CONFIGS,
 }: ProjectionChartProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
   // Equity chart excludes homeReversion as it has age eligibility requirements
@@ -262,12 +266,12 @@ export function ProjectionChart({
                       >
                         <stop
                           offset="5%"
-                          stopColor={MORTGAGE_CONFIGS[type].color}
+                          stopColor={mortgageConfigs[type].color}
                           stopOpacity={0.25}
                         />
                         <stop
                           offset="95%"
-                          stopColor={MORTGAGE_CONFIGS[type].color}
+                          stopColor={mortgageConfigs[type].color}
                           stopOpacity={0.02}
                         />
                       </linearGradient>
@@ -328,8 +332,8 @@ export function ProjectionChart({
                       key={type}
                       type="monotone"
                       dataKey={`${type}Equity`}
-                      name={MORTGAGE_CONFIGS[type].shortName}
-                      stroke={MORTGAGE_CONFIGS[type].color}
+                      name={mortgageConfigs[type].shortName}
+                      stroke={mortgageConfigs[type].color}
                       fill={`url(#gradient-${type})`}
                       strokeWidth={3}
                       strokeDasharray={ACCESSIBILITY_PATTERNS[type].strokeDasharray}
@@ -418,8 +422,8 @@ export function ProjectionChart({
                       key={type}
                       type="monotone"
                       dataKey={`${type}Balance`}
-                      name={MORTGAGE_CONFIGS[type].shortName}
-                      stroke={MORTGAGE_CONFIGS[type].color}
+                      name={mortgageConfigs[type].shortName}
+                      stroke={mortgageConfigs[type].color}
                       strokeWidth={3}
                       strokeDasharray={ACCESSIBILITY_PATTERNS[type].strokeDasharray}
                       dot={(props) => <CustomDot {...props} mortgageType={type} />}

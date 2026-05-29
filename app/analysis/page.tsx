@@ -15,6 +15,7 @@ import {
   generateHouseholdProjections,
   calculateAge,
 } from "@/lib/mortgage-calculations"
+import { ANALYSIS_MORTGAGE_CONFIGS } from "@/lib/analysis-config"
 import { Building2, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -191,6 +192,7 @@ export default function AnalysisPage() {
           selectedYear={selectedYear} 
           lifetimeOptionalPayment={lifetimeOptionalPayment}
           onLifetimePaymentChange={setLifetimeOptionalPayment}
+          mortgageConfigs={ANALYSIS_MORTGAGE_CONFIGS}
         />
 
         {/* Charts Grid */}
@@ -202,6 +204,7 @@ export default function AnalysisPage() {
               selectedYear={selectedYear}
               onYearChange={setSelectedYear}
               applicants={applicants}
+              mortgageConfigs={ANALYSIS_MORTGAGE_CONFIGS}
             />
           </div>
 
@@ -213,12 +216,13 @@ export default function AnalysisPage() {
               retirementAge={earliestRetirementAge}
               currentAge={currentAge}
               applicants={applicants}
+              mortgageConfigs={ANALYSIS_MORTGAGE_CONFIGS}
             />
           </div>
         </div>
 
         {/* Detailed Comparison Table */}
-        <ComparisonTable projections={projections} selectedYear={selectedYear} />
+        <ComparisonTable projections={projections} selectedYear={selectedYear} mortgageConfigs={ANALYSIS_MORTGAGE_CONFIGS} />
 
         {/* Footer */}
         <footer className="text-center py-8 text-sm text-muted-foreground border-t border-border mt-8">
