@@ -35,6 +35,7 @@ interface ProjectionChartProps {
   onYearChange: (year: number) => void
   applicants?: ApplicantData[]
   mortgageConfigs?: Record<MortgageType, MortgageConfig>
+  showAllInEquityChart?: boolean
 }
 
 type ChartView = "equity" | "balance" | "property"
@@ -79,10 +80,13 @@ export function ProjectionChart({
   onYearChange,
   applicants = [],
   mortgageConfigs = MORTGAGE_CONFIGS,
+  showAllInEquityChart = false,
 }: ProjectionChartProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
-  // Equity chart excludes homeReversion as it has age eligibility requirements
-  const equityMortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime"]
+  // Equity chart can show all types or exclude homeReversion based on prop
+  const equityMortgageTypes: MortgageType[] = showAllInEquityChart 
+    ? mortgageTypes 
+    : ["retirement", "rio", "lifetime"]
 
   // Early return if projections aren't loaded yet
   if (!projections?.retirement?.length) {

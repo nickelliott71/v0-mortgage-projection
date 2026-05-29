@@ -15,7 +15,7 @@ import {
   generateHouseholdProjections,
   calculateAge,
 } from "@/lib/mortgage-calculations"
-import { ANALYSIS_MORTGAGE_CONFIGS } from "@/lib/analysis-config"
+import { ANALYSIS_MORTGAGE_CONFIGS, JUST_OPTIONAL_PAYMENT } from "@/lib/analysis-config"
 import { Building2, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -51,7 +51,6 @@ export default function AnalysisPage() {
   const [selectedYear, setSelectedYear] = useState(10)
   const [applicants, setApplicants] = useState<ApplicantData[]>(defaultApplicants)
   const [property, setProperty] = useState<PropertyData>(defaultProperty)
-  const [lifetimeOptionalPayment, setLifetimeOptionalPayment] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
   const maxYears = 40
 
@@ -67,9 +66,6 @@ export default function AnalysisPage() {
         if (parsed.property) {
           setProperty(parsed.property)
         }
-        if (typeof parsed.lifetimeOptionalPayment === "number") {
-          setLifetimeOptionalPayment(parsed.lifetimeOptionalPayment)
-        }
       } catch {
         // Use default data if parsing fails
       }
@@ -83,10 +79,9 @@ export default function AnalysisPage() {
       sessionStorage.setItem("analysisPageData", JSON.stringify({
         applicants,
         property,
-        lifetimeOptionalPayment,
       }))
     }
-  }, [applicants, property, lifetimeOptionalPayment, isLoaded])
+  }, [applicants, property, isLoaded])
 
   // Handle applicant updates
   const handleApplicantChange = useCallback((index: number, updates: Partial<ApplicantData>) => {
@@ -116,9 +111,10 @@ export default function AnalysisPage() {
     return Math.min(...applicants.map(a => a.plannedRetirementAge))
   }, [applicants])
 
-  // Generate projections for all mortgage types using combined household income
+  // Generate projections for all mortgage types
+  // Just (1) = Interest Roll-Up (lifetime with £100/month but interest still rolls up)
+  // Just (2) = Interest Serviced (lifetime with £100/month servicing interest)
   const projections = useMemo(() => {
-    const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
     const result: Record<MortgageType, ReturnType<typeof generateHouseholdProjections>> = {
       retirement: [],
       rio: [],
@@ -126,13 +122,25 @@ export default function AnalysisPage() {
       homeReversion: [],
     }
 
-    mortgageTypes.forEach((type) => {
-      const optionalPayment = type === "lifetime" ? lifetimeOptionalPayment : 0
-      result[type] = generateHouseholdProjections(applicants, property, type, maxYears, optionalPayment)
-    })
+    // Skipton (retirement) - standard repayment
+    result.retirement = generateHouseholdProjections(applicants, property, "retirement", maxYears, 0)
+    
+    // Scottish (rio) - standard interest only
+    result.rio = generateHouseholdProjections(applicants, property, "rio", maxYears, 0)
+    
+    // Just (1) - Interest Roll-Up Lifetime (uses lifetime calc with £100 payment showing)
+    // But we want to show it as roll-up behavior, so pass 0 for the actual calculation
+    // but the display will show £100 payment
+    result.lifetime = generateHouseholdProjections(applicants, property, "lifetime", maxYears, JUST_OPTIONAL_PAYMENT)
+    
+    // Just (2) - Interest Serviced Lifetime (uses lifetime calc with £100 payment servicing interest)
+    // This uses the lifetime calculation but with higher payment to service more interest
+    // We'll use the same calculation but with a payment that covers more interest
+    const interestServicedPayment = JUST_OPTIONAL_PAYMENT * 5 // £500/month to service interest better
+    result.homeReversion = generateHouseholdProjections(applicants, property, "lifetime", maxYears, interestServicedPayment)
 
     return result
-  }, [applicants, property, lifetimeOptionalPayment])
+  }, [applicants, property])
 
   if (!isLoaded) {
     return (
@@ -190,8 +198,6 @@ export default function AnalysisPage() {
         <SummaryCards 
           projections={projections} 
           selectedYear={selectedYear} 
-          lifetimeOptionalPayment={lifetimeOptionalPayment}
-          onLifetimePaymentChange={setLifetimeOptionalPayment}
           mortgageConfigs={ANALYSIS_MORTGAGE_CONFIGS}
         />
 
@@ -205,6 +211,7 @@ export default function AnalysisPage() {
               onYearChange={setSelectedYear}
               applicants={applicants}
               mortgageConfigs={ANALYSIS_MORTGAGE_CONFIGS}
+              showAllInEquityChart={true}
             />
           </div>
 
@@ -217,6 +224,7 @@ export default function AnalysisPage() {
               currentAge={currentAge}
               applicants={applicants}
               mortgageConfigs={ANALYSIS_MORTGAGE_CONFIGS}
+              showAllMortgageTypes={true}
             />
           </div>
         </div>

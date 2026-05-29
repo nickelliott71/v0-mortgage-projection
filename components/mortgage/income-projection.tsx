@@ -35,6 +35,7 @@ interface IncomeProjectionProps {
   currentAge: number
   applicants?: ApplicantData[]
   mortgageConfigs?: Record<MortgageType, MortgageConfig>
+  showAllMortgageTypes?: boolean
 }
 
 export function IncomeProjection({
@@ -44,10 +45,13 @@ export function IncomeProjection({
   currentAge,
   applicants = [],
   mortgageConfigs = MORTGAGE_CONFIGS,
+  showAllMortgageTypes = false,
 }: IncomeProjectionProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
-  // Chart excludes homeReversion as it has age eligibility requirements
-  const chartMortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime"]
+  // Chart can show all types or exclude homeReversion based on prop
+  const chartMortgageTypes: MortgageType[] = showAllMortgageTypes 
+    ? mortgageTypes 
+    : ["retirement", "rio", "lifetime"]
 
   // Early return if projections aren't loaded yet
   if (!projections?.retirement?.length) {
@@ -174,7 +178,11 @@ export function IncomeProjection({
           )}
           <p className="text-xs text-muted-foreground mb-1">Annual mortgage payments:</p>
           {payload
-            .filter((p) => p.dataKey.includes("Payment") && !p.dataKey.includes("homeReversion"))
+            .filter((p) => {
+              if (!p.dataKey.includes("Payment")) return false
+              const typeName = p.dataKey.replace("Payment", "") as MortgageType
+              return chartMortgageTypes.includes(typeName)
+            })
             .map((entry, index) => {
               const typeName = entry.dataKey.replace("Payment", "") as MortgageType
               const config = mortgageConfigs[typeName]
@@ -309,7 +317,7 @@ export function IncomeProjection({
         </div>
 
         {/* Summary stats */}
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-border">
+        <div className={`grid gap-4 mt-6 pt-4 border-t border-border ${chartMortgageTypes.length === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
           {chartMortgageTypes.map((type) => {
             const data = projections[type][selectedYear]
             const annualPayment = data.monthlyPayment * 12

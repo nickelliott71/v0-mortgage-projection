@@ -1,6 +1,8 @@
 import { type MortgageType, type MortgageConfig, CHART_COLORS } from "./mortgage-calculations"
 
 // Custom labels for the analysis page
+// Just (1) = Interest Roll-Up Lifetime Mortgage (no payments, interest compounds)
+// Just (2) = Interest Serviced Lifetime Mortgage (with £100/month optional payment)
 export const ANALYSIS_MORTGAGE_CONFIGS: Record<MortgageType, MortgageConfig> = {
   retirement: {
     name: "Skipton Mortgage",
@@ -21,21 +23,24 @@ export const ANALYSIS_MORTGAGE_CONFIGS: Record<MortgageType, MortgageConfig> = {
     loanGrowth: "stable",
   },
   lifetime: {
-    name: "Just (1) Mortgage",
+    name: "Just (1) - Interest Roll-Up",
     shortName: "Just (1)",
     interestRate: 0.065,
-    description: "No monthly payments required, interest rolls up",
+    description: "Interest Roll-Up Lifetime Mortgage with £100/month optional payment",
     color: CHART_COLORS.lifetime,
     monthlyPaymentType: "optional",
     loanGrowth: "increases",
   },
   homeReversion: {
-    name: "Just (2) Mortgage",
+    name: "Just (2) - Interest Serviced",
     shortName: "Just (2)",
-    interestRate: 0,
-    description: "Sell part of home, no loan balance",
+    interestRate: 0.065,
+    description: "Interest Serviced Lifetime Mortgage with £100/month optional payment",
     color: CHART_COLORS.homeReversion,
-    monthlyPaymentType: "none",
-    loanGrowth: "fixed",
+    monthlyPaymentType: "optional",
+    loanGrowth: "stable",
   },
 }
+
+// Fixed optional payment for Just mortgages on analysis page
+export const JUST_OPTIONAL_PAYMENT = 100
