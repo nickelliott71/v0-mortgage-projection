@@ -35,6 +35,11 @@ interface Feature {
 export function ComparisonTable({ projections, selectedYear, mortgageConfigs = MORTGAGE_CONFIGS }: ComparisonTableProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
 
+  // Early return if projections aren't loaded yet
+  if (!projections?.retirement?.length) {
+    return null
+  }
+
   // Helper to render shape indicator for accessibility
   const renderShapeIndicator = (type: MortgageType, size: number = 12) => {
     const pattern = ACCESSIBILITY_PATTERNS[type]

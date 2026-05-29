@@ -84,6 +84,11 @@ export function ProjectionChart({
   // Equity chart excludes homeReversion as it has age eligibility requirements
   const equityMortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime"]
 
+  // Early return if projections aren't loaded yet
+  if (!projections?.retirement?.length) {
+    return null
+  }
+
   // Calculate retirement years for each applicant
   const retirementMarkers = applicants.map((applicant, index) => {
     const applicantAge = calculateAge(applicant.dateOfBirth)

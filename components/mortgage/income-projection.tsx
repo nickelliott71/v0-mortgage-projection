@@ -49,6 +49,11 @@ export function IncomeProjection({
   // Chart excludes homeReversion as it has age eligibility requirements
   const chartMortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime"]
 
+  // Early return if projections aren't loaded yet
+  if (!projections?.retirement?.length) {
+    return null
+  }
+
   // Helper to render shape indicator for accessibility
   const renderShapeIndicator = (type: MortgageType, color: string, size: number = 12) => {
     const pattern = ACCESSIBILITY_PATTERNS[type]
