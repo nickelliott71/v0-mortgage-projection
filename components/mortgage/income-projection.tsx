@@ -268,6 +268,7 @@ export function IncomeProjection({
               <Tooltip content={<CustomTooltip />} />
               <Legend 
                 wrapperStyle={{ paddingTop: "20px" }}
+                iconSize={0}
                 formatter={(value, entry) => {
                   // Find the mortgage type from the dataKey
                   const dataKey = entry.dataKey as string
@@ -283,7 +284,15 @@ export function IncomeProjection({
                       </span>
                     )
                   }
-                  return <span style={{ color: "#374151" }}>{value}</span>
+                  // For income, show the circle indicator
+                  return (
+                    <span className="inline-flex items-center gap-1.5" style={{ color: "#374151" }}>
+                      <svg width={10} height={10} className="flex-shrink-0">
+                        <circle cx={5} cy={5} r={4} fill="#059669" stroke="#059669" strokeWidth={1} />
+                      </svg>
+                      {value}
+                    </span>
+                  )
                 }}
               />
               
