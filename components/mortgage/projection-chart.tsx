@@ -36,6 +36,7 @@ interface ProjectionChartProps {
   applicants?: ApplicantData[]
   mortgageConfigs?: Record<MortgageType, MortgageConfig>
   showAllInEquityChart?: boolean
+  showAllInBalanceChart?: boolean
 }
 
 type ChartView = "equity" | "balance"
@@ -81,10 +82,13 @@ export function ProjectionChart({
   applicants = [],
   mortgageConfigs = MORTGAGE_CONFIGS,
   showAllInEquityChart = false,
+  showAllInBalanceChart = false,
 }: ProjectionChartProps) {
   const mortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime", "homeReversion"]
-  // Loan balance chart excludes homeReversion (Reversion)
-  const balanceMortgageTypes: MortgageType[] = ["retirement", "rio", "lifetime"]
+  // Loan balance chart can show all types or exclude homeReversion based on prop
+  const balanceMortgageTypes: MortgageType[] = showAllInBalanceChart
+    ? mortgageTypes
+    : ["retirement", "rio", "lifetime"]
   // Equity chart can show all types or exclude homeReversion based on prop
   const equityMortgageTypes: MortgageType[] = showAllInEquityChart 
     ? mortgageTypes 

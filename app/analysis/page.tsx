@@ -212,6 +212,7 @@ export default function AnalysisPage() {
               applicants={applicants}
               mortgageConfigs={ANALYSIS_MORTGAGE_CONFIGS}
               showAllInEquityChart={true}
+              showAllInBalanceChart={true}
             />
           </div>
 
