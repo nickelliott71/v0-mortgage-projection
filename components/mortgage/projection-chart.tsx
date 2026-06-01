@@ -16,6 +16,7 @@ import {
   getScaledXAxisTicks,
 } from "@/lib/mortgage-calculations"
 import {
+  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -37,7 +38,7 @@ interface ProjectionChartProps {
   showAllInEquityChart?: boolean
 }
 
-type ChartView = "equity" | "balance"
+type ChartView = "equity" | "balance" | "property"
 
 // Custom dot component for accessibility - renders different shapes for each mortgage type
 const CustomDot = ({ cx, cy, payload, dataKey, mortgageType, mortgageConfigs = MORTGAGE_CONFIGS }: { 
@@ -236,9 +237,10 @@ export function ProjectionChart({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="equity" className="space-y-4">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-md grid-cols-3">
             <TabsTrigger value="equity">Equity</TabsTrigger>
-            <TabsTrigger value="balance">Loan balance vs property value</TabsTrigger>
+            <TabsTrigger value="balance">Loan balance</TabsTrigger>
+            <TabsTrigger value="property">Property value</TabsTrigger>
           </TabsList>
 
           <TabsContent value="equity" className="space-y-4">
@@ -373,10 +375,99 @@ export function ProjectionChart({
               )}
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={combinedData} onClick={handleChartClick} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis
+                    dataKey="scaledX"
+                    type="number"
+                    domain={[0, 100]}
+                    ticks={scaledTicks.map(t => t.value)}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
+                    tickFormatter={(value) => {
+                      const tick = scaledTicks.find(t => Math.abs(t.value - value) < 0.1)
+                      return tick?.label || ''
+                    }}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
+                    tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: "20px" }}
+                    formatter={(value, entry) => {
+                      const typeMatch = entry.dataKey?.match(/^(retirement|rio|lifetime|homeReversion)/)
+                      const mortgageType = typeMatch ? typeMatch[1] as MortgageType : null
+                      return (
+                        <span className="inline-flex items-center gap-1.5" style={{ color: "#374151" }}>
+                          {mortgageType && renderShapeIndicator(mortgageType, entry.color || '#000')}
+                          {value}
+                        </span>
+                      )
+                    }}
+                  />
+                  {/* Retirement reference lines */}
+                  {uniqueRetirementYears.map((year, index) => (
+                    <ReferenceLine
+                      key={`retirement-${index}`}
+                      x={yearToScaledPosition(year)}
+                      stroke="#C50B30"
+                      strokeDasharray="5 5"
+                      strokeWidth={2}
+                    />
+                  ))}
+                  <ReferenceLine
+                    x={yearToScaledPosition(selectedYear)}
+                    stroke="#1e40af"
+                    strokeDasharray="5 5"
+                    strokeWidth={2}
+                  />
+                  {mortgageTypes.map((type) => (
+                    <Line
+                      key={type}
+                      type="monotone"
+                      dataKey={`${type}Balance`}
+                      name={mortgageConfigs[type].shortName}
+                      stroke={mortgageConfigs[type].color}
+                      strokeWidth={3}
+                      strokeDasharray={ACCESSIBILITY_PATTERNS[type].strokeDasharray}
+                      dot={(props) => <CustomDot {...props} mortgageType={type} />}
+                      activeDot={{ r: 6, strokeWidth: 2, fill: "#fff" }}
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="property" className="space-y-4">
+            <div className="relative">
+              {/* Retirement labels positioned above chart */}
+              {retirementLabels.length > 0 && (
+                <div className="relative h-10" style={{ marginLeft: 60, marginRight: 20 }}>
+                  {retirementLabels.map((label, index) => (
+                    <div 
+                      key={index} 
+                      className="absolute text-center -translate-x-1/2"
+                      style={{ left: `${yearToScaledPosition(label.years)}%` }}
+                    >
+                      <p className="text-xs font-medium" style={{ color: '#C50B30' }}>{label.title}</p>
+                      <p className="text-xs" style={{ color: '#C50B30', opacity: 0.8 }}>In {label.years} {label.years === 1 ? 'year' : 'years'}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            <div className="h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={combinedData} onClick={handleChartClick} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <defs>
-                    <linearGradient id="propertyGradientBalance" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={CHART_COLORS.property} stopOpacity={0.3} />
+                    <linearGradient id="propertyGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={CHART_COLORS.property} stopOpacity={0.4} />
                       <stop offset="95%" stopColor={CHART_COLORS.property} stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
@@ -403,24 +494,12 @@ export function ProjectionChart({
                   <Tooltip content={<CustomTooltip />} />
                   <Legend 
                     wrapperStyle={{ paddingTop: "20px" }}
-                    iconSize={0}
                     formatter={(value, entry) => {
                       const typeMatch = entry.dataKey?.match(/^(retirement|rio|lifetime|homeReversion)/)
                       const mortgageType = typeMatch ? typeMatch[1] as MortgageType : null
-                      if (mortgageType) {
-                        return (
-                          <span className="inline-flex items-center gap-1.5" style={{ color: "#374151" }}>
-                            {renderShapeIndicator(mortgageType, entry.color || '#000')}
-                            {value}
-                          </span>
-                        )
-                      }
-                      // Property value - show a filled area icon
                       return (
                         <span className="inline-flex items-center gap-1.5" style={{ color: "#374151" }}>
-                          <svg width={12} height={10} className="flex-shrink-0">
-                            <rect x={0} y={2} width={12} height={6} fill={CHART_COLORS.property} opacity={0.5} rx={1} />
-                          </svg>
+                          {mortgageType && renderShapeIndicator(mortgageType, entry.color || '#000')}
                           {value}
                         </span>
                       )
@@ -442,29 +521,14 @@ export function ProjectionChart({
                     strokeDasharray="5 5"
                     strokeWidth={2}
                   />
-                  {/* Property value as filled area - rendered first so loan lines appear on top */}
                   <Area
                     type="monotone"
                     dataKey="propertyValue"
                     name="Property value"
                     stroke={CHART_COLORS.property}
-                    fill="url(#propertyGradientBalance)"
-                    strokeWidth={2}
+                    fill="url(#propertyGradient)"
+                    strokeWidth={3}
                   />
-                  {/* Loan balance lines */}
-                  {mortgageTypes.map((type) => (
-                    <Line
-                      key={type}
-                      type="monotone"
-                      dataKey={`${type}Balance`}
-                      name={`${mortgageConfigs[type].shortName} loan`}
-                      stroke={mortgageConfigs[type].color}
-                      strokeWidth={3}
-                      strokeDasharray={ACCESSIBILITY_PATTERNS[type].strokeDasharray}
-                      dot={(props) => <CustomDot {...props} mortgageType={type} />}
-                      activeDot={{ r: 6, strokeWidth: 2, fill: "#fff" }}
-                    />
-                  ))}
                 </AreaChart>
               </ResponsiveContainer>
             </div>
